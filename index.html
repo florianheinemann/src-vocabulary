@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NATO Alphabet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light dark;
+    /* night: deep navy field */
+    --deep: #0E2436;   /* background        */
+    --lead: #EAF1F7;   /* the letter        */
+    --dim:  #6098BE;   /* the codeword tail */
+    --mute: #3A6180;   /* slider + labels   */
+  }
+  @media (prefers-color-scheme: light) {
+    :root[data-theme="auto"] {
+      /* day: warm off-white field */
+      --deep: #F4F1EA;
+      --lead: #14293B;
+      --dim:  #5F819B;
+      --mute: #A9A296;
+    }
+  }
+  /* manual overrides — after the media block so they win on source order */
+  :root[data-theme="light"] {
+    --deep: #F4F1EA;
+    --lead: #14293B;
+    --dim:  #5F819B;
+    --mute: #A9A296;
+  }
+  :root[data-theme="dark"] {
+    --deep: #0E2436;
+    --lead: #EAF1F7;
+    --dim:  #6098BE;
+    --mute: #3A6180;
+  }
+
+  /* theme toggle: outline = light, half = auto, filled = dark */
+  #theme {
+    position: fixed;
+    z-index: 3;
+    top: calc(3vh + env(safe-area-inset-top));
+    right: calc(4vw + env(safe-area-inset-right));
+    width: 22px; height: 22px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--mute);
+    opacity: .45;
+    cursor: pointer;
+    transition: opacity 160ms ease, color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #theme:hover, #theme:focus-visible { opacity: 1; color: var(--dim); }
+  #theme:focus-visible { outline: none; }
+  #theme svg { width: 100%; height: 100%; display: block; }
+  #theme .fill { opacity: 0; transition: opacity 160ms ease; }
+  :root[data-theme="auto"] #theme .half { opacity: 1; }
+  :root[data-theme="dark"] #theme .full { opacity: 1; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: var(--deep); }
+  body {
+    background: var(--deep);
+    color: var(--lead);
+    font-family: "Space Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  #bg {
+    position: fixed;
+    inset: 0;
+    background: var(--deep);
+    z-index: 0;
+  }
+  #wrap {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    font-size: min(21vw, 34vh);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    transition: transform 260ms cubic-bezier(.22,.7,.3,1);
+    will-change: transform;
+  }
+  #head { color: var(--lead); }
+  #tail {
+    color: var(--dim);
+    opacity: 0;
+    transition: opacity 180ms ease 60ms;
+  }
+  #wrap.reveal #tail { opacity: 1; }
+  #wrap.instant, #wrap.instant #tail { transition: none; }
+
+  /* pace control */
+  #pace {
+    z-index: 2;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(4vh + env(safe-area-inset-bottom));
+    width: min(82vw, 360px);
+  }
+  #speed {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+    display: block;
+  }
+  #speed::-webkit-slider-runnable-track {
+    height: 2px;
+    background: var(--mute);
+  }
+  #speed::-moz-range-track {
+    height: 2px;
+    background: var(--mute);
+  }
+  #speed::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px; height: 14px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--dim);
+    cursor: pointer;
+  }
+  #speed::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: var(--dim);
+    cursor: pointer;
+  }
+  #speed:focus-visible { outline: none; }
+  #speed:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--dim) 35%, transparent); }
+  #speed:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--dim) 35%, transparent); }
+  #marks {
+    position: relative;
+    height: 1.2em;
+    margin-top: .9em;
+    font-size: clamp(8px, 1.4vmin, 11px);
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  /* each label sits under the centre of its thumb position */
+  #marks span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    transition: color 160ms ease;
+  }
+  #marks span:nth-child(1) { left: 7px; }
+  #marks span:nth-child(2) { left: calc(7px + (100% - 14px) / 4); }
+  #marks span:nth-child(3) { left: calc(7px + (100% - 14px) / 2); }
+  #marks span:nth-child(4) { left: calc(7px + (100% - 14px) * 3 / 4); }
+  #marks span:nth-child(5) { left: calc(100% - 7px); }
+  #marks span.on { color: var(--dim); }
+
+  @media (prefers-reduced-motion: reduce) {
+    #wrap, #tail { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div id="bg"></div>
+
+  <button id="theme" type="button" aria-label="Theme: auto" title="Theme: auto">
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path class="fill half" d="M10 2.75a7.25 7.25 0 0 1 0 14.5z" fill="currentColor"/>
+      <circle class="fill full" cx="10" cy="10" r="7.25" fill="currentColor"/>
+    </svg>
+  </button>
+  <div id="wrap"><span id="head"></span><span id="tail"></span></div>
+
+  <div id="pace">
+    <input id="speed" type="range" min="0" max="4" step="1" value="2" aria-label="Pace">
+    <div id="marks"><span>Flash</span><span>V. fast</span><span>Fast</span><span>Mid</span><span>Slow</span></div>
+  </div>
+
+<script>
+  const WORDS = ["Alfa","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
+                 "India","Juliett","Kilo","Lima","Mike","November","Oscar","Papa",
+                 "Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey",
+                 "X-ray","Yankee","Zulu"];
+
+  const PACES   = [500, 750, 1000, 1750, 2500];  // flash / very fast / fast / mid / slow: letter-only time
+  const WORD_MS = 500;                 // codeword always half a second
+  const ZOOM    = 1.55;
+
+  const wrap  = document.getElementById("wrap");
+  const head  = document.getElementById("head");
+  const tail  = document.getElementById("tail");
+  const speed = document.getElementById("speed");
+  const marks = document.querySelectorAll("#marks span");
+
+  let letterMs = PACES[2];
+  let revealed = false;
+  let deck = [], last = null;
+
+  function draw() {
+    if (!deck.length) {
+      deck = WORDS.slice();
+      for (let j = deck.length - 1; j > 0; j--) {
+        const k = Math.floor(Math.random() * (j + 1));
+        [deck[j], deck[k]] = [deck[k], deck[j]];
+      }
+      if (deck[deck.length - 1] === last && deck.length > 1) {
+        [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
+      }
+    }
+    last = deck.pop();
+    return last;
+  }
+
+  function place() {
+    wrap.classList.add("instant");
+    wrap.style.transform = "none";
+    void wrap.offsetWidth;
+    const hw = head.getBoundingClientRect().width;
+    const tw = tail.getBoundingClientRect().width;
+    wrap.style.transformOrigin = (hw / 2) + "px center";
+    wrap.style.transform = revealed
+      ? "translateX(0) scale(1)"
+      : "translateX(" + (tw / 2) + "px) scale(" + ZOOM + ")";
+    void wrap.offsetWidth;
+  }
+
+  function showLetter() {
+    const word = draw();
+    revealed = false;
+    wrap.classList.remove("reveal");
+    head.textContent = word[0];
+    tail.textContent = word.slice(1);
+    place();
+    setTimeout(showWord, letterMs);
+  }
+
+  function showWord() {
+    revealed = true;
+    wrap.classList.remove("instant");
+    void wrap.offsetWidth;
+    wrap.style.transform = "translateX(0) scale(1)";
+    wrap.classList.add("reveal");
+    setTimeout(showLetter, WORD_MS);
+  }
+
+  function setPace() {
+    const v = +speed.value;
+    letterMs = PACES[v];
+    marks.forEach((m, n) => m.classList.toggle("on", n === v));
+    save("nato.pace", v);
+  }
+
+  // settings persist in localStorage; silently ignored where it's unavailable
+  function load(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* no storage, no problem */ }
+  }
+
+  // theme: auto -> light -> dark -> auto
+  const THEMES = ["auto", "light", "dark"];
+  const root  = document.documentElement;
+  const theme = document.getElementById("theme");
+
+  let t = Math.max(0, THEMES.indexOf(load("nato.theme")));
+  function setTheme() {
+    root.dataset.theme = THEMES[t];
+    theme.setAttribute("aria-label", "Theme: " + THEMES[t]);
+    theme.setAttribute("title", "Theme: " + THEMES[t]);
+    save("nato.theme", THEMES[t]);
+  }
+  theme.addEventListener("click", function () {
+    t = (t + 1) % THEMES.length;
+    setTheme();
+  });
+  setTheme();
+
+  const savedPace = parseInt(load("nato.pace"), 10);
+  if (savedPace >= 0 && savedPace < PACES.length) speed.value = savedPace;
+
+  speed.addEventListener("input", setPace);
+  window.addEventListener("resize", place);
+  setPace();
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(showLetter);
+  } else {
+    showLetter();
+  }
+</script>
+</body>
+</html>
