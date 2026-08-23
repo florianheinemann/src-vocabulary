@@ -453,17 +453,32 @@ const PAIRS = [
     }, 300);
   }
 
+  // a compound too long to break stays on one line and runs past the edge of
+  // the field without making the block any taller, so measure the line boxes
+  const range = document.createRange();
+  function widest() {
+    let w = 0;
+    [head, tail].forEach(function (el) {
+      range.selectNodeContents(el);
+      const rects = range.getClientRects();
+      for (let i = 0; i < rects.length; i++) w = Math.max(w, rects[i].width);
+    });
+    return w;
+  }
+
   // phrases run long, so the type shrinks until the pair clears the controls
   function fit() {
     // reserve whatever the control block actually occupies, plus air
     const reserve = window.innerHeight - bar.getBoundingClientRect().top + 16;
     const room = window.innerHeight / 2 - reserve;
-    const min  = 15;
+    const maxW = wrap.clientWidth;
+    const min  = 13;
     let size = Math.min(window.innerWidth * 0.105, window.innerHeight * 0.115);
     wrap.style.fontSize = size + "px";
     let guard = 0;
     // the prompt phase rides half the translation's height lower, so budget for that
-    while (size > min && guard++ < 60 && wrap.offsetHeight / 2 + drop() > room) {
+    while (size > min && guard++ < 80 &&
+           (wrap.offsetHeight / 2 + drop() > room || widest() > maxW)) {
       size *= 0.94;
       wrap.style.fontSize = size + "px";
     }
