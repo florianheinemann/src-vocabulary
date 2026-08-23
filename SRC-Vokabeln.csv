@@ -1,8 +1,8 @@
 ﻿Deutsch;Englisch;Komplexität
-manövrierunfähig;not under command;komplex
+manövrierunfähig;not under command;mittel
 Schiff treibt manövrierunfähig;vessel is not under command, drifting;komplex
 Wassereinbruch;flooding;einfach
-Yacht sinkt nach Wassereinbruch;yacht is sinking after flooding;komplex
+Yacht sinkt nach Wassereinbruch;yacht is sinking after flooding;mittel
 starke Schlagseite nach Backbord;heavy list to port side;komplex
 Ruder gebrochen · Ruderschaden;rudder broken · damaged rudder;mittel
 defekte Ruderanlage;defective steering gear;mittel
@@ -10,34 +10,34 @@ gebrochener Mast;broken mast;einfach
 Motorschaden;engine trouble;einfach
 Maschinenraum · Motorraum;engine room;einfach
 nach einer Explosion;after explosion;einfach
-Schiff brennt;vessel on fire;mittel
+Schiff brennt;vessel on fire;einfach
 Feuer in den Aufbauten;fire in superstructures;mittel
-Feuer nicht unter Kontrolle;fire not under control;mittel
-Schiff in kritischem Zustand;ship is in critical condition;komplex
+Feuer nicht unter Kontrolle;fire not under control;einfach
+Schiff in kritischem Zustand;ship is in critical condition;einfach
 Kollision mit Fischereifahrzeug;in collision with fishing vessel;komplex
-treiben auf die Sände zu;drifting towards the banks;komplex
-wir müssen das Schiff verlassen;we have to abandon the vessel;komplex
-benötigen sofortige Hilfe;require immediate assistance;mittel
+treiben auf die Sände zu;drifting towards the banks;mittel
+wir müssen das Schiff verlassen;we have to abandon the vessel;mittel
+benötigen sofortige Hilfe;require immediate assistance;einfach
 benötige Schlepperhilfe;require tug assistance;mittel
 Hilfe bei der Brandabwehr leisten;to assist in fire fighting;komplex
 diese Position ansteuern, um Hilfe zu leisten;to approach to this position for assistance;komplex
-Position, Kurs und Geschwindigkeit angeben;indicate position, course and speed;komplex
-für mögliche Hilfeleistung;for possible assistance;mittel
+Position, Kurs und Geschwindigkeit angeben;indicate position, course and speed;mittel
+für mögliche Hilfeleistung;for possible assistance;einfach
 benötigen Hubschrauber;require helicopter;einfach
 Person / Mensch über Bord;person over board;einfach
-zuletzt gesichtet um 0730 UTC;last seen at 0730 UTC;mittel
-Besatzungsmitglied;crew member;einfach
+zuletzt gesichtet um 0730 UTC;last seen at 0730 UTC;einfach
+Besatzungsmitglied;crew member;mittel
 schwer verletzt;seriously injured;einfach
 bewusstlos;unconscious;einfach
-Verdacht auf Herzinfarkt;suspect of heart attack;komplex
-benötige dringend ärztliche Hilfe;require urgent medical assistance;komplex
-medizinische Hilfe per Hubschrauber;medical assistance by helicopter;komplex
+Verdacht auf Herzinfarkt;suspect of heart attack;mittel
+benötige dringend ärztliche Hilfe;require urgent medical assistance;einfach
+medizinische Hilfe per Hubschrauber;medical assistance by helicopter;einfach
 ist vom Mast gefallen;has fallen off the mast;mittel
-Überlebende wurden nicht gesichtet;survivors were not sighted;komplex
+Überlebende wurden nicht gesichtet;survivors were not sighted;mittel
 gekentertes Rettungsfloß;capsized life raft;mittel
 zwei Personen an Bord;two persons on board;einfach
-Schiffe in der Nähe werden gebeten …;ships in vicinity are requested to …;komplex
-die Schifffahrt wird gebeten …;shipping is requested to …;komplex
+Schiffe in der Nähe werden gebeten …;ships in vicinity are requested to …;mittel
+die Schifffahrt wird gebeten …;shipping is requested to …;mittel
 scharf Ausschau halten;to keep sharp lookout;mittel
 der Seenotleitung Bremen berichten;report to Maritime Rescue Coordination Centre Bremen;komplex
 vorsichtig navigieren;to navigate carefully;einfach
@@ -48,40 +48,40 @@ in der Nähe von · auf Position;in vicinity of · in position;mittel
 Leucht- und Heultonne;light and whistle buoy;mittel
 als verlöscht gemeldet;is reported unlit;komplex
 Betonnung;buoyage;mittel
-Fahrwasser;fairway;einfach
+Fahrwasser;fairway;mittel
 Verkehrstrennungsgebiet;traffic separation scheme;mittel
-Tiefwasserweg;deep water lane;einfach
-Nautische Warnung;navigational warning;einfach
+Tiefwasserweg;deep water lane;mittel
+Nautische Warnung;navigational warning;mittel
 Nachrichten für Seefahrer;notices to mariners;mittel
 Unterwasser-Kabelarbeiten werden durchgeführt;underwater cable operations in progress;komplex
 wird durchgeführt werden vom … bis …;will be carried out from … to …;komplex
 laut;according to;einfach
-rote Raketen beobachtet;red rockets observed;mittel
-treibende 40-Fuß-Container, rot gestrichen;drifting 40-feet containers, red painted;komplex
-ein Container mit der Aufschrift …;one container marked with …;komplex
+rote Raketen beobachtet;red rockets observed;einfach
+treibende 40-Fuß-Container, rot gestrichen;drifting 40-feet containers, red painted;mittel
+ein Container mit der Aufschrift …;one container marked with …;mittel
 den Anker verloren;has lost anchor;mittel
 rechtweisende Peilung 45 Grad;true bearing of 45 degrees;komplex
-rechtweisender Kurs;true course;mittel
+rechtweisender Kurs;true course;komplex
 12 sm südlich Kap …;12 nm south of Cape …;mittel
-Seemeile (sm);nautical mile (nm);einfach
-Sturmwarnung;gale warning;einfach
+Seemeile (sm);nautical mile (nm);mittel
+Sturmwarnung;gale warning;mittel
 Vorhersagegebiet;forecast area;einfach
 Windstärke 8 bis 9;force 8 to 9;mittel
 zunehmend auf Sturmstärke;increasing to gale force;mittel
 abnehmend auf 7;decreasing to force 7;mittel
 rasch zunehmend;rapidly increasing;einfach
 rechtdrehend · linksdrehend;veering · backing;komplex
-starke westliche Winde;strong westerly winds;einfach
-raue See · sehr schwere See;rough sea · very rough sea;mittel
-hohe Dünung;high swell;einfach
+starke westliche Winde;strong westerly winds;mittel
+raue See · sehr schwere See;rough sea · very rough sea;einfach
+hohe Dünung;high swell;mittel
 Sprühregen, zeitweise;drizzle at times;mittel
 Schauer;showers;einfach
-mäßige bis schlechte Sicht;moderate to poor visibility;mittel
-überfällig seit 16. Januar;overdue since January 16th;mittel
+mäßige bis schlechte Sicht;moderate to poor visibility;einfach
+überfällig seit 16. Januar;overdue since January 16th;einfach
 unterwegs von … nach …;underway from … to …;mittel
 mit Bestimmungshafen Visby;bound for Visby;komplex
-ist bisher dort nicht eingetroffen;has not yet arrived there;komplex
-verließ Klintholm um 0600 Ortszeit;left Klintholm at 0600 local time;komplex
+ist bisher dort nicht eingetroffen;has not yet arrived there;mittel
+verließ Klintholm um 0600 Ortszeit;left Klintholm at 0600 local time;mittel
 Rumpf · Aufbauten · Segel;hull · superstructures · sails;einfach
 Länge 12 m · Länge 40 Fuß;length 12 m · length 40 feet;einfach
 Motorschiff · Rufzeichen;M/V (motor vessel) · C/S (call sign);mittel
