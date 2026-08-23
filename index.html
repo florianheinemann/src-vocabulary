@@ -265,8 +265,8 @@ const PAIRS = [
   ["Schiffe in der Nähe werden gebeten …", "ships in vicinity are requested to …"],
   ["die Schifffahrt wird gebeten …", "shipping is requested to …"],
   ["scharf Ausschau halten", "to keep sharp lookout"],
-  ["der Seenotleitung Bremen berichten", "report to Maritime Rescue Co-ordination Centre Bremen"],
-  ["vorsichtig navigieren", "to navigate with caution / carefully"],
+  ["der Seenotleitung Bremen berichten", "report to Maritime Rescue Coordination Centre Bremen"],
+  ["vorsichtig navigieren", "to navigate carefully"],
   ["weder ankern noch Fischereigeschirr nutzen", "neither to anchor nor to use fishing gear"],
   ["Abstand von mehr als 2 sm halten", "to keep a berth of more than 2 nm"],
   ["Küstenwache", "Coast Guard"],
@@ -281,7 +281,7 @@ const PAIRS = [
   ["Nachrichten für Seefahrer", "notices to mariners"],
   ["Unterwasser-Kabelarbeiten werden durchgeführt", "underwater cable operations in progress"],
   ["wird durchgeführt werden vom … bis …", "will be carried out from … to …"],
-  ["laut · gemäß", "according to"],
+  ["laut", "according to"],
   ["rote Raketen beobachtet", "red rockets observed"],
   ["treibende 40-Fuß-Container, rot gestrichen", "drifting 40-feet containers, red painted"],
   ["ein Container mit der Aufschrift …", "one container marked with …"],
@@ -315,11 +315,14 @@ const PAIRS = [
   ["folgendes empfangen auf UKW-Kanal 16", "following received on VHF channel 16"],
   ["gesichtet · beobachtet", "sighted · observed"],
   ["in diesem Gebiet", "in this area"],
-  ["Komma (vom Prüfer vorgelesen)", "DECIMAL"],
+  ["Komma", "DECIMAL"],
 ];
-  // pace: how long the prompt stands alone, then how long the pair stays up
-  const PROMPT_MS = [1800, 2400, 3200, 4200, 5600];
-  const ANSWER_MS = [1400, 1800, 2300, 2900, 3600];
+  // pace scales a budget that grows with the phrase: a single word needs far
+  // less time on screen than a seven-word sentence, in either phase
+  const PACE = [0.55, 0.75, 1, 1.35, 1.8];
+  const PROMPT_MS = [900, 600];   // [fixed, per word] before the reveal
+  const ANSWER_MS = [700, 450];   // [fixed, per word] once the pair is up
+  const FLOOR = 800, CEILING = 9000;
 
   const wrap  = document.getElementById("wrap");
   const head  = document.getElementById("head");
@@ -402,6 +405,15 @@ const PAIRS = [
     void wrap.offsetWidth;
   }
 
+  // punctuation-only tokens (the dot between synonyms, an ellipsis) are not words
+  function words(text) {
+    return text.split(/\s+/).filter(function (w) { return /[^\W_]/.test(w); }).length;
+  }
+
+  function span(ms, text) {
+    return Math.min(CEILING, Math.max(FLOOR, (ms[0] + ms[1] * words(text)) * PACE[pace]));
+  }
+
   function showPrompt() {
     const pair = draw();
     revealed = false;
@@ -410,7 +422,7 @@ const PAIRS = [
     tail.textContent = pair[1 - dir];
     fit();
     place();
-    timer = setTimeout(showAnswer, PROMPT_MS[pace]);
+    timer = setTimeout(showAnswer, span(PROMPT_MS, head.textContent));
   }
 
   function showAnswer() {
@@ -419,7 +431,7 @@ const PAIRS = [
     void wrap.offsetWidth;
     wrap.style.transform = "translateY(0)";
     wrap.classList.add("reveal");
-    timer = setTimeout(showPrompt, ANSWER_MS[pace]);
+    timer = setTimeout(showPrompt, span(ANSWER_MS, tail.textContent));
   }
 
   function restart() {
@@ -468,7 +480,7 @@ const PAIRS = [
   setTheme();
 
   const savedPace = parseInt(load("src.pace"), 10);
-  if (savedPace >= 0 && savedPace < PROMPT_MS.length) speed.value = savedPace;
+  if (savedPace >= 0 && savedPace < PACE.length) speed.value = savedPace;
   dir = load("src.dir") === "1" ? 1 : 0;
   setDir();
 
