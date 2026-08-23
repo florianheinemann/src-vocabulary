@@ -108,9 +108,10 @@
     line-height: 1.1;
     letter-spacing: -0.015em;
     text-wrap: balance;
-    transition: transform 300ms cubic-bezier(.22,.7,.3,1);
+    transition: transform 300ms cubic-bezier(.22,.7,.3,1), opacity 260ms ease;
     will-change: transform;
   }
+  #wrap.hide { opacity: 0; }
   #head {
     display: block;
     color: var(--lead);
@@ -196,8 +197,51 @@
   #marks span:nth-child(5) { left: calc(100% - 7px); }
   #marks span.on { color: var(--dim); }
 
+  #total {
+    margin-top: .7em;
+    text-align: center;
+    font-size: clamp(8px, 1.4vmin, 11px);
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+
+  /* end of a round: the field clears, a rule draws itself under the count */
+  #lap {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .9em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease;
+  }
+  #lap.on { opacity: 1; }
+  #lap span {
+    font-size: clamp(13px, 2.4vmin, 20px);
+    font-weight: 500;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  #lap .rule {
+    display: block;
+    width: min(46vw, 320px);
+    height: 2px;
+    background: var(--dim);
+    transform: scaleX(0);
+    transition: transform 820ms cubic-bezier(.22,.7,.3,1);
+  }
+  #lap.on .rule { transform: scaleX(1); }
+
   @media (prefers-reduced-motion: reduce) {
-    #wrap, #tail { transition: none; }
+    #wrap, #tail, #lap, #lap .rule { transition: none; }
+    #lap .rule { transform: scaleX(1); }
   }
 </style>
 </head>
@@ -218,9 +262,12 @@
 
   <div id="wrap"><span id="head"></span><span id="tail"></span></div>
 
+  <div id="lap" aria-hidden="true"><span id="lapnum"></span><i class="rule"></i></div>
+
   <div id="pace">
     <input id="speed" type="range" min="0" max="4" step="1" value="2" aria-label="Tempo">
     <div id="marks"><span>Flott</span><span>Zügig</span><span>Normal</span><span>Ruhig</span><span>Langsam</span></div>
+    <div id="total" aria-live="polite"></div>
   </div>
 
 <script>
@@ -330,6 +377,10 @@ const PAIRS = [
   const speed = document.getElementById("speed");
   const marks = document.querySelectorAll("#marks span");
   const lang  = document.getElementById("lang");
+  const bar   = document.getElementById("pace");
+  const total = document.getElementById("total");
+  const lap    = document.getElementById("lap");
+  const lapnum = document.getElementById("lapnum");
   const from  = document.getElementById("from");
   const to    = document.getElementById("to");
 
@@ -351,6 +402,7 @@ const PAIRS = [
   let revealed = false;
   let deck = [], last = null;
   let timer = null;
+  let round = 0, running = false;
 
   // settings persist in localStorage; silently ignored where it's unavailable
   function load(key) {
@@ -360,25 +412,51 @@ const PAIRS = [
     try { localStorage.setItem(key, value); } catch (e) { /* no storage, no problem */ }
   }
 
-  // every phrase comes up once per loop; a reshuffle never repeats the last one
-  function draw() {
-    if (!deck.length) {
-      deck = CARDS.map(function (c, i) { return i; });
-      for (let j = deck.length - 1; j > 0; j--) {
-        const k = Math.floor(Math.random() * (j + 1));
-        [deck[j], deck[k]] = [deck[k], deck[j]];
-      }
-      if (deck[deck.length - 1] === last && deck.length > 1) {
-        [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
-      }
+  // every phrase comes up once per round; a reshuffle never repeats the last one
+  function refill() {
+    deck = CARDS.map(function (c, i) { return i; });
+    for (let j = deck.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [deck[j], deck[k]] = [deck[k], deck[j]];
     }
+    if (deck[deck.length - 1] === last && deck.length > 1) {
+      [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
+    }
+    round++;
+  }
+
+  function draw() {
     last = deck.pop();
     return CARDS[last];
   }
 
+  // an empty deck means the round is over: mark it, then roll straight on
+  function next() {
+    if (deck.length) return showPrompt();
+    if (running) return interlude();
+    refill();
+    running = true;
+    showPrompt();
+  }
+
+  function interlude() {
+    wrap.classList.add("hide");
+    timer = setTimeout(function () {
+      refill();
+      lapnum.textContent = "Runde " + round;
+      lap.classList.add("on");
+      timer = setTimeout(function () {
+        lap.classList.remove("on");
+        wrap.classList.remove("hide");
+        showPrompt();
+      }, 1150);
+    }, 300);
+  }
+
   // phrases run long, so the type shrinks until the pair clears the controls
   function fit() {
-    const reserve = Math.max(58, window.innerHeight * 0.15);  // slider, labels, air
+    // reserve whatever the control block actually occupies, plus air
+    const reserve = window.innerHeight - bar.getBoundingClientRect().top + 16;
     const room = window.innerHeight / 2 - reserve;
     const min  = 15;
     let size = Math.min(window.innerWidth * 0.105, window.innerHeight * 0.115);
@@ -432,19 +510,37 @@ const PAIRS = [
     void wrap.offsetWidth;
     wrap.style.transform = "translateY(0)";
     wrap.classList.add("reveal");
-    timer = setTimeout(showPrompt, span(ANSWER_MS, tail.textContent));
+    timer = setTimeout(next, span(ANSWER_MS, tail.textContent));
   }
 
   function restart() {
     clearTimeout(timer);
+    lap.classList.remove("on");
+    wrap.classList.remove("hide");
     deck = [];
     last = null;
-    showPrompt();
+    round = 0;
+    running = false;
+    next();
+  }
+
+  // a full round is the sum of every card's two phases at the current settings
+  function roundLength() {
+    let ms = 0;
+    for (let i = 0; i < CARDS.length; i++) {
+      ms += span(PROMPT_MS, CARDS[i][dir]) + span(ANSWER_MS, CARDS[i][1 - dir]);
+    }
+    const secs = Math.round(ms / 1000);
+    total.textContent = CARDS.length + " Vokabeln · " + Math.floor(secs / 60) +
+                        ":" + ("0" + (secs % 60)).slice(-2) + " min pro Runde";
   }
 
   function setPace() {
     pace = +speed.value;
     marks.forEach((m, n) => m.classList.toggle("on", n === pace));
+    roundLength();
+    fit();
+    place();
     save("src.pace", pace);
   }
 
@@ -454,6 +550,7 @@ const PAIRS = [
     to.textContent   = dir ? "DE" : "EN";
     lang.setAttribute("aria-label", "Richtung: " + LABEL[dir]);
     lang.setAttribute("title", "Richtung: " + LABEL[dir]);
+    roundLength();
     save("src.dir", dir);
   }
   lang.addEventListener("click", function () {
@@ -490,9 +587,9 @@ const PAIRS = [
   setPace();
 
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(showPrompt);
+    document.fonts.ready.then(next);
   } else {
-    showPrompt();
+    next();
   }
 </script>
 </body>
