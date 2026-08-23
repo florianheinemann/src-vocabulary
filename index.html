@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="de" data-theme="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NATO Alphabet</title>
+<title>SRC Vokabeln</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -12,8 +12,8 @@
     color-scheme: light dark;
     /* night: deep navy field */
     --deep: #0E2436;   /* background        */
-    --lead: #EAF1F7;   /* the letter        */
-    --dim:  #6098BE;   /* the codeword tail */
+    --lead: #EAF1F7;   /* the prompt        */
+    --dim:  #6098BE;   /* the translation   */
     --mute: #3A6180;   /* slider + labels   */
   }
   @media (prefers-color-scheme: light) {
@@ -39,13 +39,11 @@
     --mute: #3A6180;
   }
 
-  /* theme toggle: outline = light, half = auto, filled = dark */
-  #theme {
+  /* corner controls: theme dot right, language switch left */
+  #theme, #lang {
     position: fixed;
     z-index: 3;
     top: calc(3vh + env(safe-area-inset-top));
-    right: calc(4vw + env(safe-area-inset-right));
-    width: 22px; height: 22px;
     padding: 0;
     border: none;
     background: none;
@@ -55,12 +53,35 @@
     transition: opacity 160ms ease, color 160ms ease;
     -webkit-tap-highlight-color: transparent;
   }
-  #theme:hover, #theme:focus-visible { opacity: 1; color: var(--dim); }
-  #theme:focus-visible { outline: none; }
+  #theme:hover, #theme:focus-visible,
+  #lang:hover,  #lang:focus-visible { opacity: 1; color: var(--dim); }
+  #theme:focus-visible, #lang:focus-visible { outline: none; }
+
+  /* theme toggle: outline = light, half = auto, filled = dark */
+  #theme {
+    right: calc(4vw + env(safe-area-inset-right));
+    width: 22px; height: 22px;
+  }
   #theme svg { width: 100%; height: 100%; display: block; }
   #theme .fill { opacity: 0; transition: opacity 160ms ease; }
   :root[data-theme="auto"] #theme .half { opacity: 1; }
   :root[data-theme="dark"] #theme .full { opacity: 1; }
+
+  /* language switch: reads as the direction being drilled */
+  #lang {
+    left: calc(4vw + env(safe-area-inset-left));
+    height: 22px;
+    display: flex;
+    align-items: center;
+    gap: .45em;
+    font: inherit;
+    font-size: clamp(9px, 1.5vmin, 12px);
+    font-weight: 700;
+    letter-spacing: .12em;
+    line-height: 1;
+  }
+  #lang .arrow { opacity: .6; }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: var(--deep); }
   body {
@@ -82,20 +103,27 @@
   #wrap {
     position: relative;
     z-index: 1;
-    display: inline-flex;
-    font-size: min(21vw, 34vh);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    transition: transform 260ms cubic-bezier(.22,.7,.3,1);
+    width: min(86vw, 900px);
+    text-align: center;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    transition: transform 300ms cubic-bezier(.22,.7,.3,1);
     will-change: transform;
   }
-  #head { color: var(--lead); }
+  #head {
+    display: block;
+    color: var(--lead);
+    font-weight: 700;
+  }
   #tail {
+    display: block;
+    margin-top: .34em;
+    font-size: .8em;
+    font-weight: 500;
     color: var(--dim);
     opacity: 0;
-    transition: opacity 180ms ease 60ms;
+    transition: opacity 200ms ease 60ms;
   }
   #wrap.reveal #tail { opacity: 1; }
   #wrap.instant, #wrap.instant #tail { transition: none; }
@@ -176,6 +204,10 @@
 <body>
   <div id="bg"></div>
 
+  <button id="lang" type="button" aria-label="Richtung: Deutsch nach Englisch" title="Richtung: Deutsch nach Englisch">
+    <span id="from">DE</span><span class="arrow">&#8594;</span><span id="to">EN</span>
+  </button>
+
   <button id="theme" type="button" aria-label="Theme: auto" title="Theme: auto">
     <svg viewBox="0 0 20 20" aria-hidden="true">
       <circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
@@ -183,86 +215,126 @@
       <circle class="fill full" cx="10" cy="10" r="7.25" fill="currentColor"/>
     </svg>
   </button>
+
   <div id="wrap"><span id="head"></span><span id="tail"></span></div>
 
   <div id="pace">
-    <input id="speed" type="range" min="0" max="4" step="1" value="2" aria-label="Pace">
-    <div id="marks"><span>Flash</span><span>V. fast</span><span>Fast</span><span>Mid</span><span>Slow</span></div>
+    <input id="speed" type="range" min="0" max="4" step="1" value="2" aria-label="Tempo">
+    <div id="marks"><span>Flott</span><span>Zügig</span><span>Normal</span><span>Ruhig</span><span>Langsam</span></div>
   </div>
 
 <script>
-  const WORDS = ["Alfa","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
-                 "India","Juliett","Kilo","Lima","Mike","November","Oscar","Papa",
-                 "Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey",
-                 "X-ray","Yankee","Zulu"];
-
-  const PACES   = [500, 750, 1000, 1750, 2500];  // flash / very fast / fast / mid / slow: letter-only time
-  const WORD_MS = 500;                 // codeword always half a second
-  const ZOOM    = 1.55;
+const PAIRS = [
+  ["manövrierunfähig", "not under command"],
+  ["Schiff treibt manövrierunfähig", "vessel is not under command, drifting"],
+  ["Wassereinbruch", "flooding"],
+  ["Yacht sinkt nach Wassereinbruch", "yacht is sinking after flooding"],
+  ["starke Schlagseite nach Backbord", "heavy list to port side"],
+  ["Ruder gebrochen · Ruderschaden", "rudder broken · damaged rudder"],
+  ["defekte Ruderanlage", "defective steering gear"],
+  ["gebrochener Mast", "broken mast"],
+  ["Motorschaden", "engine trouble"],
+  ["Maschinenraum · Motorraum", "engine room"],
+  ["nach einer Explosion", "after explosion"],
+  ["Schiff brennt", "vessel on fire"],
+  ["Feuer in den Aufbauten", "fire in superstructures"],
+  ["Feuer nicht unter Kontrolle", "fire not under control"],
+  ["Schiff in kritischem Zustand", "ship is in critical condition"],
+  ["Kollision mit Fischereifahrzeug", "in collision with fishing vessel"],
+  ["treiben auf die Sände zu", "drifting towards the banks"],
+  ["wir müssen das Schiff verlassen", "we have to abandon the vessel"],
+  ["benötigen sofortige Hilfe", "require immediate assistance"],
+  ["benötige Schlepperhilfe", "require tug assistance"],
+  ["Hilfe bei der Brandabwehr leisten", "to assist in fire fighting"],
+  ["diese Position ansteuern, um Hilfe zu leisten", "to approach to this position for assistance"],
+  ["Position, Kurs und Geschwindigkeit angeben", "indicate position, course and speed"],
+  ["für mögliche Hilfeleistung", "for possible assistance"],
+  ["benötigen Hubschrauber", "require helicopter"],
+  ["Person / Mensch über Bord", "person over board"],
+  ["zuletzt gesichtet um 0730 UTC", "last seen at 0730 UTC"],
+  ["Besatzungsmitglied", "crew member"],
+  ["schwer verletzt", "seriously injured"],
+  ["bewusstlos", "unconscious"],
+  ["Verdacht auf Herzinfarkt", "suspect of heart attack"],
+  ["benötige dringend ärztliche Hilfe", "require urgent medical assistance"],
+  ["medizinische Hilfe per Hubschrauber", "medical assistance by helicopter"],
+  ["ist vom Mast gefallen", "has fallen off the mast"],
+  ["Überlebende wurden nicht gesichtet", "survivors were not sighted"],
+  ["gekentertes Rettungsfloß", "capsized life raft"],
+  ["zwei Personen an Bord", "two persons on board"],
+  ["Schiffe in der Nähe werden gebeten …", "ships in vicinity are requested to …"],
+  ["die Schifffahrt wird gebeten …", "shipping is requested to …"],
+  ["scharf Ausschau halten", "to keep sharp lookout"],
+  ["der Seenotleitung Bremen berichten", "report to Maritime Rescue Co-ordination Centre Bremen"],
+  ["vorsichtig navigieren", "to navigate with caution / carefully"],
+  ["weder ankern noch Fischereigeschirr nutzen", "neither to anchor nor to use fishing gear"],
+  ["Abstand von mehr als 2 sm halten", "to keep a berth of more than 2 nm"],
+  ["Küstenwache", "Coast Guard"],
+  ["in der Nähe von · auf Position", "in vicinity of · in position"],
+  ["Leucht- und Heultonne", "light and whistle buoy"],
+  ["als verlöscht gemeldet", "is reported unlit"],
+  ["Betonnung", "buoyage"],
+  ["Fahrwasser", "fairway"],
+  ["Verkehrstrennungsgebiet", "traffic separation scheme"],
+  ["Tiefwasserweg", "deep water lane"],
+  ["Nautische Warnung", "navigational warning"],
+  ["Nachrichten für Seefahrer", "notices to mariners"],
+  ["Unterwasser-Kabelarbeiten werden durchgeführt", "underwater cable operations in progress"],
+  ["wird durchgeführt werden vom … bis …", "will be carried out from … to …"],
+  ["laut · gemäß", "according to"],
+  ["rote Raketen beobachtet", "red rockets observed"],
+  ["treibende 40-Fuß-Container, rot gestrichen", "drifting 40-feet containers, red painted"],
+  ["ein Container mit der Aufschrift …", "one container marked with …"],
+  ["den Anker verloren", "has lost anchor"],
+  ["rechtweisende Peilung 45 Grad", "true bearing of 45 degrees"],
+  ["rechtweisender Kurs", "true course"],
+  ["12 sm südlich Kap …", "12 nm south of Cape …"],
+  ["Seemeile (sm)", "nautical mile (nm)"],
+  ["Sturmwarnung", "gale warning"],
+  ["Vorhersagegebiet", "forecast area"],
+  ["Windstärke 8 bis 9", "force 8 to 9"],
+  ["zunehmend auf Sturmstärke", "increasing to gale force"],
+  ["abnehmend auf 7", "decreasing to force 7"],
+  ["rasch zunehmend", "rapidly increasing"],
+  ["rechtdrehend · linksdrehend", "veering · backing"],
+  ["starke westliche Winde", "strong westerly winds"],
+  ["raue See · sehr schwere See", "rough sea · very rough sea"],
+  ["hohe Dünung", "high swell"],
+  ["Sprühregen, zeitweise", "drizzle at times"],
+  ["Schauer", "showers"],
+  ["mäßige bis schlechte Sicht", "moderate to poor visibility"],
+  ["überfällig seit 16. Januar", "overdue since January 16th"],
+  ["unterwegs von … nach …", "underway from … to …"],
+  ["mit Bestimmungshafen Visby", "bound for Visby"],
+  ["ist bisher dort nicht eingetroffen", "has not yet arrived there"],
+  ["verließ Klintholm um 0600 Ortszeit", "left Klintholm at 0600 local time"],
+  ["Rumpf · Aufbauten · Segel", "hull · superstructures · sails"],
+  ["Länge 12 m · Länge 40 Fuß", "length 12 m · length 40 feet"],
+  ["Motorschiff · Segelyacht · Rufzeichen", "M/V (motor vessel) · S/Y · C/S (call sign)"],
+  ["Geschwindigkeit 13 Knoten", "speed 13 knots"],
+  ["folgendes empfangen auf UKW-Kanal 16", "following received on VHF channel 16"],
+  ["gesichtet · beobachtet", "sighted · observed"],
+  ["in diesem Gebiet", "in this area"],
+  ["Komma (vom Prüfer vorgelesen)", "DECIMAL"],
+];
+  // pace: how long the prompt stands alone, then how long the pair stays up
+  const PROMPT_MS = [1800, 2400, 3200, 4200, 5600];
+  const ANSWER_MS = [1400, 1800, 2300, 2900, 3600];
 
   const wrap  = document.getElementById("wrap");
   const head  = document.getElementById("head");
   const tail  = document.getElementById("tail");
   const speed = document.getElementById("speed");
   const marks = document.querySelectorAll("#marks span");
+  const lang  = document.getElementById("lang");
+  const from  = document.getElementById("from");
+  const to    = document.getElementById("to");
 
-  let letterMs = PACES[2];
+  let pace = 2;
+  let dir = 0;                 // 0 = DE -> EN, 1 = EN -> DE
   let revealed = false;
   let deck = [], last = null;
-
-  function draw() {
-    if (!deck.length) {
-      deck = WORDS.slice();
-      for (let j = deck.length - 1; j > 0; j--) {
-        const k = Math.floor(Math.random() * (j + 1));
-        [deck[j], deck[k]] = [deck[k], deck[j]];
-      }
-      if (deck[deck.length - 1] === last && deck.length > 1) {
-        [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
-      }
-    }
-    last = deck.pop();
-    return last;
-  }
-
-  function place() {
-    wrap.classList.add("instant");
-    wrap.style.transform = "none";
-    void wrap.offsetWidth;
-    const hw = head.getBoundingClientRect().width;
-    const tw = tail.getBoundingClientRect().width;
-    wrap.style.transformOrigin = (hw / 2) + "px center";
-    wrap.style.transform = revealed
-      ? "translateX(0) scale(1)"
-      : "translateX(" + (tw / 2) + "px) scale(" + ZOOM + ")";
-    void wrap.offsetWidth;
-  }
-
-  function showLetter() {
-    const word = draw();
-    revealed = false;
-    wrap.classList.remove("reveal");
-    head.textContent = word[0];
-    tail.textContent = word.slice(1);
-    place();
-    setTimeout(showWord, letterMs);
-  }
-
-  function showWord() {
-    revealed = true;
-    wrap.classList.remove("instant");
-    void wrap.offsetWidth;
-    wrap.style.transform = "translateX(0) scale(1)";
-    wrap.classList.add("reveal");
-    setTimeout(showLetter, WORD_MS);
-  }
-
-  function setPace() {
-    const v = +speed.value;
-    letterMs = PACES[v];
-    marks.forEach((m, n) => m.classList.toggle("on", n === v));
-    save("nato.pace", v);
-  }
+  let timer = null;
 
   // settings persist in localStorage; silently ignored where it's unavailable
   function load(key) {
@@ -272,17 +344,109 @@
     try { localStorage.setItem(key, value); } catch (e) { /* no storage, no problem */ }
   }
 
+  // every phrase comes up once per loop; a reshuffle never repeats the last one
+  function draw() {
+    if (!deck.length) {
+      deck = PAIRS.map(function (p, i) { return i; });
+      for (let j = deck.length - 1; j > 0; j--) {
+        const k = Math.floor(Math.random() * (j + 1));
+        [deck[j], deck[k]] = [deck[k], deck[j]];
+      }
+      if (deck[deck.length - 1] === last && deck.length > 1) {
+        [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
+      }
+    }
+    last = deck.pop();
+    return PAIRS[last];
+  }
+
+  // phrases run long, so the type shrinks until the pair clears the controls
+  function fit() {
+    const reserve = Math.max(58, window.innerHeight * 0.15);  // slider, labels, air
+    const room = window.innerHeight / 2 - reserve;
+    const min  = 15;
+    let size = Math.min(window.innerWidth * 0.105, window.innerHeight * 0.115);
+    wrap.style.fontSize = size + "px";
+    let guard = 0;
+    // the prompt phase rides half the translation's height lower, so budget for that
+    while (size > min && guard++ < 60 && wrap.offsetHeight / 2 + drop() > room) {
+      size *= 0.94;
+      wrap.style.fontSize = size + "px";
+    }
+  }
+
+  function drop() {
+    const gap = parseFloat(getComputedStyle(tail).marginTop) || 0;
+    return (tail.offsetHeight + gap) / 2;
+  }
+
+  // before the reveal the prompt sits centred; the translation waits underneath
+  function place() {
+    wrap.classList.add("instant");
+    wrap.style.transform = "none";
+    void wrap.offsetWidth;
+    wrap.style.transform = revealed ? "translateY(0)" : "translateY(" + drop() + "px)";
+    void wrap.offsetWidth;
+  }
+
+  function showPrompt() {
+    const pair = draw();
+    revealed = false;
+    wrap.classList.remove("reveal");
+    head.textContent = pair[dir];
+    tail.textContent = pair[1 - dir];
+    fit();
+    place();
+    timer = setTimeout(showAnswer, PROMPT_MS[pace]);
+  }
+
+  function showAnswer() {
+    revealed = true;
+    wrap.classList.remove("instant");
+    void wrap.offsetWidth;
+    wrap.style.transform = "translateY(0)";
+    wrap.classList.add("reveal");
+    timer = setTimeout(showPrompt, ANSWER_MS[pace]);
+  }
+
+  function restart() {
+    clearTimeout(timer);
+    deck = [];
+    last = null;
+    showPrompt();
+  }
+
+  function setPace() {
+    pace = +speed.value;
+    marks.forEach((m, n) => m.classList.toggle("on", n === pace));
+    save("src.pace", pace);
+  }
+
+  const LABEL = ["Deutsch nach Englisch", "Englisch nach Deutsch"];
+  function setDir() {
+    from.textContent = dir ? "EN" : "DE";
+    to.textContent   = dir ? "DE" : "EN";
+    lang.setAttribute("aria-label", "Richtung: " + LABEL[dir]);
+    lang.setAttribute("title", "Richtung: " + LABEL[dir]);
+    save("src.dir", dir);
+  }
+  lang.addEventListener("click", function () {
+    dir = 1 - dir;
+    setDir();
+    restart();
+  });
+
   // theme: auto -> light -> dark -> auto
   const THEMES = ["auto", "light", "dark"];
   const root  = document.documentElement;
   const theme = document.getElementById("theme");
 
-  let t = Math.max(0, THEMES.indexOf(load("nato.theme")));
+  let t = Math.max(0, THEMES.indexOf(load("src.theme")));
   function setTheme() {
     root.dataset.theme = THEMES[t];
     theme.setAttribute("aria-label", "Theme: " + THEMES[t]);
     theme.setAttribute("title", "Theme: " + THEMES[t]);
-    save("nato.theme", THEMES[t]);
+    save("src.theme", THEMES[t]);
   }
   theme.addEventListener("click", function () {
     t = (t + 1) % THEMES.length;
@@ -290,17 +454,19 @@
   });
   setTheme();
 
-  const savedPace = parseInt(load("nato.pace"), 10);
-  if (savedPace >= 0 && savedPace < PACES.length) speed.value = savedPace;
+  const savedPace = parseInt(load("src.pace"), 10);
+  if (savedPace >= 0 && savedPace < PROMPT_MS.length) speed.value = savedPace;
+  dir = load("src.dir") === "1" ? 1 : 0;
+  setDir();
 
   speed.addEventListener("input", setPace);
-  window.addEventListener("resize", place);
+  window.addEventListener("resize", function () { fit(); place(); });
   setPace();
 
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(showLetter);
+    document.fonts.ready.then(showPrompt);
   } else {
-    showLetter();
+    showPrompt();
   }
 </script>
 </body>
