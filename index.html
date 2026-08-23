@@ -330,6 +330,19 @@ const PAIRS = [
   const from  = document.getElementById("from");
   const to    = document.getElementById("to");
 
+  // an entry that pairs terms with a dot is really two vocabulary items;
+  // split it when both sides list the same number of terms, otherwise the
+  // dot marks synonyms sharing one translation and the entry stays whole
+  const CARDS = [];
+  PAIRS.forEach(function (pair) {
+    const a = pair[0].split("\u00B7"), b = pair[1].split("\u00B7");
+    if (a.length > 1 && a.length === b.length) {
+      for (let i = 0; i < a.length; i++) CARDS.push([a[i].trim(), b[i].trim()]);
+    } else {
+      CARDS.push(pair);
+    }
+  });
+
   let pace = 2;
   let dir = 0;                 // 0 = DE -> EN, 1 = EN -> DE
   let revealed = false;
@@ -347,7 +360,7 @@ const PAIRS = [
   // every phrase comes up once per loop; a reshuffle never repeats the last one
   function draw() {
     if (!deck.length) {
-      deck = PAIRS.map(function (p, i) { return i; });
+      deck = CARDS.map(function (c, i) { return i; });
       for (let j = deck.length - 1; j > 0; j--) {
         const k = Math.floor(Math.random() * (j + 1));
         [deck[j], deck[k]] = [deck[k], deck[j]];
@@ -357,7 +370,7 @@ const PAIRS = [
       }
     }
     last = deck.pop();
-    return PAIRS[last];
+    return CARDS[last];
   }
 
   // phrases run long, so the type shrinks until the pair clears the controls
