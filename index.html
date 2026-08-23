@@ -317,11 +317,11 @@ const PAIRS = [
   ["in diesem Gebiet", "in this area"],
   ["Komma", "DECIMAL"],
 ];
-  // pace scales a budget that grows with the phrase: a single word needs far
-  // less time on screen than a seven-word sentence, in either phase
+  // pace scales a budget that grows with the phrase: reading time tracks
+  // letters rather than words, so a German compound gets the time it needs
   const PACE = [0.55, 0.75, 1, 1.35, 1.8];
-  const PROMPT_MS = [900, 600];   // [fixed, per word] before the reveal
-  const ANSWER_MS = [700, 450];   // [fixed, per word] once the pair is up
+  const PROMPT_MS = [800, 120];   // [fixed, per letter] before the reveal
+  const ANSWER_MS = [650, 90];    // [fixed, per letter] once the pair is up
   const FLOOR = 800, CEILING = 9000;
 
   const wrap  = document.getElementById("wrap");
@@ -405,13 +405,14 @@ const PAIRS = [
     void wrap.offsetWidth;
   }
 
-  // punctuation-only tokens (the dot between synonyms, an ellipsis) are not words
-  function words(text) {
-    return text.split(/\s+/).filter(function (w) { return /[^\W_]/.test(w); }).length;
+  // spaces and punctuation cost no reading time worth counting; the class is
+  // Unicode-aware so Umlaute and ß count like any other letter
+  function letters(text) {
+    return (text.match(/[\p{L}\p{N}]/gu) || []).length;
   }
 
   function span(ms, text) {
-    return Math.min(CEILING, Math.max(FLOOR, (ms[0] + ms[1] * words(text)) * PACE[pace]));
+    return Math.min(CEILING, Math.max(FLOOR, (ms[0] + ms[1] * letters(text)) * PACE[pace]));
   }
 
   function showPrompt() {
