@@ -1,101 +1,110 @@
 ﻿Deutsch;Englisch
-manövrierunfähig;not under command
-Schiff treibt manövrierunfähig;vessel is not under command, drifting
-Wassereinbruch;flooding
-Yacht sinkt nach Wassereinbruch;yacht is sinking after flooding
-starke Schlagseite nach Backbord;heavy list to port side
-Ruder gebrochen;rudder broken
-Ruderschaden;damaged rudder
-defekte Ruderanlage;defective steering gear
-gebrochener Mast;broken mast
-Motorschaden;engine trouble
-Maschinenraum · Motorraum;engine room
-nach einer Explosion;after explosion
-Schiff brennt;vessel on fire
-Feuer in den Aufbauten;fire in superstructures
-Feuer nicht unter Kontrolle;fire not under control
-Schiff in kritischem Zustand;ship is in critical condition
-Kollision mit Fischereifahrzeug;in collision with fishing vessel
-treiben auf die Sände zu;drifting towards the banks
-wir müssen das Schiff verlassen;we have to abandon the vessel
-benötigen sofortige Hilfe;require immediate assistance
-benötige Schlepperhilfe;require tug assistance
-Hilfe bei der Brandabwehr leisten;to assist in fire fighting
-diese Position ansteuern, um Hilfe zu leisten;to approach to this position for assistance
-Position, Kurs und Geschwindigkeit angeben;indicate position, course and speed
-für mögliche Hilfeleistung;for possible assistance
-benötigen Hubschrauber;require helicopter
-Person / Mensch über Bord;person over board
-zuletzt gesichtet um 0730 UTC;last seen at 0730 UTC
-Besatzungsmitglied;crew member
-schwer verletzt;seriously injured
-bewusstlos;unconscious
-Verdacht auf Herzinfarkt;suspect of heart attack
-benötige dringend ärztliche Hilfe;require urgent medical assistance
-medizinische Hilfe per Hubschrauber;medical assistance by helicopter
-ist vom Mast gefallen;has fallen off the mast
-Überlebende wurden nicht gesichtet;survivors were not sighted
-gekentertes Rettungsfloß;capsized life raft
-zwei Personen an Bord;two persons on board
-Schiffe in der Nähe werden gebeten …;ships in vicinity are requested to …
-die Schifffahrt wird gebeten …;shipping is requested to …
-scharf Ausschau halten;to keep sharp lookout
-der Seenotleitung Bremen berichten;report to Maritime Rescue Coordination Centre Bremen
-vorsichtig navigieren;to navigate carefully
-weder ankern noch Fischereigeschirr nutzen;neither to anchor nor to use fishing gear
-Abstand von mehr als 2 sm halten;to keep a berth of more than 2 nm
-Küstenwache;Coast Guard
-in der Nähe von;in vicinity of
-auf Position;in position
-Leucht- und Heultonne;light and whistle buoy
-als verlöscht gemeldet;is reported unlit
-Betonnung;buoyage
-Fahrwasser;fairway
-Verkehrstrennungsgebiet;traffic separation scheme
-Tiefwasserweg;deep water lane
-Nautische Warnung;navigational warning
-Nachrichten für Seefahrer;notices to mariners
-Unterwasser-Kabelarbeiten werden durchgeführt;underwater cable operations in progress
-wird durchgeführt werden vom … bis …;will be carried out from … to …
-laut;according to
-rote Raketen beobachtet;red rockets observed
-treibende 40-Fuß-Container, rot gestrichen;drifting 40-feet containers, red painted
-ein Container mit der Aufschrift …;one container marked with …
-den Anker verloren;has lost anchor
-rechtweisende Peilung 45 Grad;true bearing of 45 degrees
-rechtweisender Kurs;true course
-12 sm südlich Kap …;12 nm south of Cape …
-Seemeile (sm);nautical mile (nm)
-Sturmwarnung;gale warning
-Vorhersagegebiet;forecast area
-Windstärke 8 bis 9;force 8 to 9
-zunehmend auf Sturmstärke;increasing to gale force
-abnehmend auf 7;decreasing to force 7
+abnehmend;decreasing
+Dünung;swell
+mäßige Sicht;moderate visibility
+schlechte Sicht;poor visibility
 rasch zunehmend;rapidly increasing
-rechtdrehend;veering
-linksdrehend;backing
-starke westliche Winde;strong westerly winds
 raue See;rough sea
-sehr schwere See;very rough sea
-hohe Dünung;high swell
-Sprühregen, zeitweise;drizzle at times
+Regen;rain
 Schauer;showers
-mäßige bis schlechte Sicht;moderate to poor visibility
-überfällig seit 16. Januar;overdue since January 16th
-unterwegs von … nach …;underway from … to …
-mit Bestimmungshafen Visby;bound for Visby
-ist bisher dort nicht eingetroffen;has not yet arrived there
-verließ Klintholm um 0600 Ortszeit;left Klintholm at 0600 local time
-Rumpf;hull
+rechtdrehend;veering
+Sprühregen;drizzle
+Stärke;force
+westliche Winde;westerly winds
+Sturmwarnung;gale warning
+zunehmend;increasing
+Vorhersagegebiet;forecast area
+Wettervorhersage;weather forecast
+hat Anker verloren;has lost anchor
+zeitweise;at times
+bewusstlos;unconscious
+bisher nicht eingetroffen;not yet arrived
+Brandabwehr;fire fighting
+Sände (die Sandbänke);banks
+dringend;urgent
+Feuer;fire
+gebrochener Mast;broken mast
+Herzinfarkt;heart attack
+Hubschrauber;helicopter
+gekentert;capsized
+Kollision;collision
+in kritischem Zustand;in critical condition
+manövrierunfähig (sein);not (to be) under command
+Mensch über Bord;person over board
+mögliche Hilfeleistung;possible assistance
+nicht unter Kontrolle (sein);not (to be) under control
+Rettungsfloß;liferaft
+Rettungsboot;lifeboat
+Ruder gebrochen/defekt;rudder broken
+Schiff brennt;vessel on fire
+Schlepperhilfe;tug assistance
+schwer verletzt;seriously injured
+Seenotleitung;MRCC
+Yacht sinkt;yacht is sinking
+sofortige Hilfe;immediate help
+Wassereinbruch;flooding
+scharf Ausschau halten;keep sharp lookout
+starke Schlagseite;heavy list
+überfällig;Overdue
+Überlebende;survivors
+vom Mast gefallen;fallen off the mast
+Rote Raketen;red rockets
+Motorschaden;engine trouble
+Abstand halten;keep a berth
+ankern;to anchor
+ansteuern;to approach
+auf der/dieser Route;on this route
+auf (etw.) zu;towards (something)
+mit Bestimmungshafen;bound for
+Fahrwasser;fairway
+Gebiet;area
+Geschwindigkeit;speed
+in der Nähe von;in vicinity of
+Kurs;course
+Leucht-Heultonne;light and whistle buoy
+Länge;length
+Ortszeit;local time
+Position;position
+rechtweisende Peilung;true bearing
+rechtweisender Kurs;true course
+Tiefwasserweg;deep water lane
+unterwegs;underway
+Verkehrstrennungsgebiet;traffic separation scheme
+verlöscht gemeldet;reported unlit
+vorsichtig navigieren;navigate carefully
 Aufbauten;superstructures
-Segel;sails
-Länge 12 m;length 12 m
-Länge 40 Fuß;length 40 feet
-Motorschiff;M/V (motor vessel)
-Rufzeichen;C/S (call sign)
-Geschwindigkeit 13 Knoten;speed 13 knots
-folgendes empfangen auf UKW-Kanal 16;following received on VHF channel 16
-gesichtet;sighted
-beobachtet;observed
-in diesem Gebiet;in this area
-Komma;DECIMAL
+mit der Aufschrift;marked with
+Fischereifahrzeug;fishing vessel
+Motorraum;engine room
+rot gestrichene;red painted
+roter Rumpf;red hull
+Steuerbord;starboard
+weiße Segel;white sails
+Backbord;port side
+Besatzungsmitglied;crew member
+berichten an;report to
+fortgeführt;in progress
+nicht gesichtet;not sighted
+weder noch;neither ... nor ...
+werden gebeten;are requested
+zuletzt gesichtet;last seen
+zwei Personen;two persons
+zwischen;between
+an Bord;on board
+empfangen;received
+Austausch;replacement
+Betonnung;buoyage
+Fischereigeschirr nutzen;to use fishing gear
+Nachrichten für Seefahrer;notices to mariners
+Nautische Warnung;navigational warning
+Unterwasser-Kabel-Arbeiten;underwater cable operations
+Küstenwache;coast guard
+ich korrigiere;I correct
+ich wiederhole;I repeat
+ich buchstabiere;I spell
+ich wiederhole und buchstabiere;I repeat and spell
+Doppelpunkt;colon
+Komma;decimal
+Punkt (Satzzeichen);stop
+neues Wort;new word/next word
+in Zahlen;in figures
