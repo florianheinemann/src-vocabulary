@@ -40,7 +40,7 @@
   }
 
   /* corner controls: theme dot right, the direction switch left */
-  #theme, #switches {
+  #theme, #lang {
     position: fixed;
     z-index: 3;
     top: calc(3vh + env(safe-area-inset-top));
@@ -80,14 +80,9 @@
   :root[data-theme="dark"] #theme .full { opacity: 1; }
 
   /* left switch: the direction being drilled */
-  #switches {
+  #lang {
     left: calc(4vw + env(safe-area-inset-left));
     height: 22px;
-    display: flex;
-    align-items: center;
-    gap: .8em;
-  }
-  #lang {
     display: flex;
     align-items: center;
     gap: .45em;
@@ -349,11 +344,9 @@
 <body>
   <div id="bg"></div>
 
-  <div id="switches">
-    <button id="lang" type="button" aria-label="Richtung: Deutsch nach Englisch" title="Richtung: Deutsch nach Englisch">
-      <span id="from">DE</span><span class="arrow">&#8594;</span><span id="to">EN</span>
-    </button>
-  </div>
+  <button id="lang" type="button" aria-label="Richtung: Deutsch nach Englisch" title="Richtung: Deutsch nach Englisch">
+    <span id="from">DE</span><span class="arrow">&#8594;</span><span id="to">EN</span>
+  </button>
 
   <button id="theme" type="button" aria-label="Theme: auto" title="Theme: auto">
     <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -880,7 +873,7 @@ const CARDS = [
   // the field itself is the reveal: anywhere but the controls turns the card
   document.addEventListener("click", function (e) {
     if (!cards || revealed) return;
-    if (e.target.closest && e.target.closest("#dock, #switches, #theme")) return;
+    if (e.target.closest && e.target.closest("#dock, #lang, #theme")) return;
     flip();
   });
 
