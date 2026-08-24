@@ -4,7 +4,8 @@ Schiff treibt manövrierunfähig;vessel is not under command, drifting;komplex
 Wassereinbruch;flooding;einfach
 Yacht sinkt nach Wassereinbruch;yacht is sinking after flooding;mittel
 starke Schlagseite nach Backbord;heavy list to port side;komplex
-Ruder gebrochen · Ruderschaden;rudder broken · damaged rudder;mittel
+Ruder gebrochen;rudder broken;mittel
+Ruderschaden;damaged rudder;mittel
 defekte Ruderanlage;defective steering gear;mittel
 gebrochener Mast;broken mast;einfach
 Motorschaden;engine trouble;einfach
@@ -44,7 +45,8 @@ vorsichtig navigieren;to navigate carefully;einfach
 weder ankern noch Fischereigeschirr nutzen;neither to anchor nor to use fishing gear;komplex
 Abstand von mehr als 2 sm halten;to keep a berth of more than 2 nm;komplex
 Küstenwache;Coast Guard;einfach
-in der Nähe von · auf Position;in vicinity of · in position;mittel
+in der Nähe von;in vicinity of;mittel
+auf Position;in position;mittel
 Leucht- und Heultonne;light and whistle buoy;mittel
 als verlöscht gemeldet;is reported unlit;komplex
 Betonnung;buoyage;mittel
@@ -70,9 +72,11 @@ Windstärke 8 bis 9;force 8 to 9;mittel
 zunehmend auf Sturmstärke;increasing to gale force;mittel
 abnehmend auf 7;decreasing to force 7;mittel
 rasch zunehmend;rapidly increasing;einfach
-rechtdrehend · linksdrehend;veering · backing;komplex
+rechtdrehend;veering;komplex
+linksdrehend;backing;komplex
 starke westliche Winde;strong westerly winds;mittel
-raue See · sehr schwere See;rough sea · very rough sea;einfach
+raue See;rough sea;einfach
+sehr schwere See;very rough sea;einfach
 hohe Dünung;high swell;mittel
 Sprühregen, zeitweise;drizzle at times;mittel
 Schauer;showers;einfach
@@ -82,11 +86,16 @@ unterwegs von … nach …;underway from … to …;mittel
 mit Bestimmungshafen Visby;bound for Visby;komplex
 ist bisher dort nicht eingetroffen;has not yet arrived there;mittel
 verließ Klintholm um 0600 Ortszeit;left Klintholm at 0600 local time;mittel
-Rumpf · Aufbauten · Segel;hull · superstructures · sails;einfach
-Länge 12 m · Länge 40 Fuß;length 12 m · length 40 feet;einfach
-Motorschiff · Rufzeichen;M/V (motor vessel) · C/S (call sign);mittel
+Rumpf;hull;einfach
+Aufbauten;superstructures;einfach
+Segel;sails;einfach
+Länge 12 m;length 12 m;einfach
+Länge 40 Fuß;length 40 feet;einfach
+Motorschiff;M/V (motor vessel);mittel
+Rufzeichen;C/S (call sign);mittel
 Geschwindigkeit 13 Knoten;speed 13 knots;einfach
 folgendes empfangen auf UKW-Kanal 16;following received on VHF channel 16;komplex
-gesichtet · beobachtet;sighted · observed;einfach
+gesichtet;sighted;einfach
+beobachtet;observed;einfach
 in diesem Gebiet;in this area;einfach
 Komma;DECIMAL;komplex

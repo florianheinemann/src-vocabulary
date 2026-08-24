@@ -394,13 +394,14 @@
 
 <script>
 // [German, English, complexity: 1 plain, 2 middling, 3 hard]
-const PAIRS = [
+const CARDS = [
   ["manövrierunfähig", "not under command", 2],
   ["Schiff treibt manövrierunfähig", "vessel is not under command, drifting", 3],
   ["Wassereinbruch", "flooding", 1],
   ["Yacht sinkt nach Wassereinbruch", "yacht is sinking after flooding", 2],
   ["starke Schlagseite nach Backbord", "heavy list to port side", 3],
-  ["Ruder gebrochen · Ruderschaden", "rudder broken · damaged rudder", 2],
+  ["Ruder gebrochen", "rudder broken", 2],
+  ["Ruderschaden", "damaged rudder", 2],
   ["defekte Ruderanlage", "defective steering gear", 2],
   ["gebrochener Mast", "broken mast", 1],
   ["Motorschaden", "engine trouble", 1],
@@ -440,7 +441,8 @@ const PAIRS = [
   ["weder ankern noch Fischereigeschirr nutzen", "neither to anchor nor to use fishing gear", 3],
   ["Abstand von mehr als 2 sm halten", "to keep a berth of more than 2 nm", 3],
   ["Küstenwache", "Coast Guard", 1],
-  ["in der Nähe von · auf Position", "in vicinity of · in position", 2],
+  ["in der Nähe von", "in vicinity of", 2],
+  ["auf Position", "in position", 2],
   ["Leucht- und Heultonne", "light and whistle buoy", 2],
   ["als verlöscht gemeldet", "is reported unlit", 3],
   ["Betonnung", "buoyage", 2],
@@ -466,9 +468,11 @@ const PAIRS = [
   ["zunehmend auf Sturmstärke", "increasing to gale force", 2],
   ["abnehmend auf 7", "decreasing to force 7", 2],
   ["rasch zunehmend", "rapidly increasing", 1],
-  ["rechtdrehend · linksdrehend", "veering · backing", 3],
+  ["rechtdrehend", "veering", 3],
+  ["linksdrehend", "backing", 3],
   ["starke westliche Winde", "strong westerly winds", 2],
-  ["raue See · sehr schwere See", "rough sea · very rough sea", 1],
+  ["raue See", "rough sea", 1],
+  ["sehr schwere See", "very rough sea", 1],
   ["hohe Dünung", "high swell", 2],
   ["Sprühregen, zeitweise", "drizzle at times", 2],
   ["Schauer", "showers", 1],
@@ -478,14 +482,19 @@ const PAIRS = [
   ["mit Bestimmungshafen Visby", "bound for Visby", 3],
   ["ist bisher dort nicht eingetroffen", "has not yet arrived there", 2],
   ["verließ Klintholm um 0600 Ortszeit", "left Klintholm at 0600 local time", 2],
-  ["Rumpf · Aufbauten · Segel", "hull · superstructures · sails", 1],
-  ["Länge 12 m · Länge 40 Fuß", "length 12 m · length 40 feet", 1],
-  ["Motorschiff · Rufzeichen", "M/V (motor vessel) · C/S (call sign)", 2],
+  ["Rumpf", "hull", 1],
+  ["Aufbauten", "superstructures", 1],
+  ["Segel", "sails", 1],
+  ["Länge 12 m", "length 12 m", 1],
+  ["Länge 40 Fuß", "length 40 feet", 1],
+  ["Motorschiff", "M/V (motor vessel)", 2],
+  ["Rufzeichen", "C/S (call sign)", 2],
   ["Geschwindigkeit 13 Knoten", "speed 13 knots", 1],
   ["folgendes empfangen auf UKW-Kanal 16", "following received on VHF channel 16", 3],
-  ["gesichtet · beobachtet", "sighted · observed", 1],
+  ["gesichtet", "sighted", 1],
+  ["beobachtet", "observed", 1],
   ["in diesem Gebiet", "in this area", 1],
-  ["Komma", "DECIMAL", 3],
+  ["Komma", "DECIMAL", 3]
 ];
   // pace scales a budget that grows with the phrase: reading time tracks
   // letters rather than words, so a German compound gets the time it needs.
@@ -512,19 +521,6 @@ const PAIRS = [
   const to    = document.getElementById("to");
   const noBtn  = document.getElementById("wrong");
   const yesBtn = document.getElementById("right");
-
-  // an entry that pairs terms with a dot is really two vocabulary items;
-  // split it when both sides list the same number of terms, otherwise the
-  // dot marks synonyms sharing one translation and the entry stays whole
-  const CARDS = [];
-  PAIRS.forEach(function (pair) {
-    const a = pair[0].split("·"), b = pair[1].split("·");
-    if (a.length > 1 && a.length === b.length) {
-      for (let i = 0; i < a.length; i++) CARDS.push([a[i].trim(), b[i].trim(), pair[2]]);
-    } else {
-      CARDS.push(pair);
-    }
-  });
 
   // which complexities are in play: everything, the harder two thirds, or the hardest
   const SCOPES = [
