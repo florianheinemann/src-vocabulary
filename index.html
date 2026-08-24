@@ -500,7 +500,8 @@ const PAIRS = [
   const tail  = document.getElementById("tail");
   const speed = document.getElementById("speed");
   const marks = document.querySelectorAll("#marks span");
-  const lang  = document.getElementById("lang");
+  const langBtn = document.getElementById("lang");
+  const arrow = document.querySelector("#lang .arrow");
   const scopeBtn = document.getElementById("scope");
   const dock  = document.getElementById("dock");
   const total = document.getElementById("total");
@@ -538,7 +539,8 @@ const PAIRS = [
   const CARD = 4;
   let pace = 2;
   let cards = false;
-  let dir = 0;                 // 0 = DE -> EN, 1 = EN -> DE
+  let lang = 0;                // 0 = DE -> EN, 1 = EN -> DE, 2 = both mixed
+  const MIX = 2;
   let revealed = false;
   let deck = [], last = null;
   let timer = null;
@@ -678,7 +680,7 @@ const PAIRS = [
   }
 
   function showPrompt() {
-    face(draw());
+    face(draw(), side());
     timer = setTimeout(showAnswer, span(PROMPT_MS, head.textContent));
   }
 
@@ -688,11 +690,16 @@ const PAIRS = [
     timer = setTimeout(next, span(ANSWER_MS, tail.textContent));
   }
 
+  // mixed draws a side per card, so a word can come up either way round
+  function side() {
+    return lang === MIX ? (Math.random() < 0.5 ? 0 : 1) : lang;
+  }
+
   // put a pair on the field, prompt up, translation held back
-  function face(pair) {
+  function face(pair, d) {
     clear();
-    head.textContent = pair[dir];
-    tail.textContent = pair[1 - dir];
+    head.textContent = pair[d];
+    tail.textContent = pair[1 - d];
     fit();
     place();
   }
@@ -702,14 +709,31 @@ const PAIRS = [
   const DAY = 864e5;
   const AGAIN = 3, AGAIN_AGAIN = 9;  // how far back a card drops when it comes back
   const STUCK = 3;                   // misses in one round before it is set aside
-  let MEM = read("src.mem") || {};
+  let MEM = fold(read("src.mem") || {});
   let queue = [], cur = null;
   let done = 0, hits = 0, miss = 0;
   let busy = false;
 
-  // one record per card and direction: recalling a word is not the same skill
-  // as producing it, so each side of the pair earns its own interval
-  function id(card) { return card[0] + "␟" + card[1] + "␟" + dir; }
+  // one record per card, whichever way round it was drilled: a vocabulary item
+  // is one thing to know, so DE, EN and mixed all read and write the same state
+  function id(card) { return card[0] + "␟" + card[1]; }
+
+  // memory was once kept per direction; fold those halves together and keep
+  // the weaker of the two, so nothing already learned is claimed twice
+  function fold(mem) {
+    const out = {};
+    Object.keys(mem).forEach(function (k) {
+      const m = mem[k], base = k.replace(/␟[01]$/, ""), had = out[base];
+      out[base] = had ? {
+        n: Math.min(had.n, m.n),
+        e: Math.min(had.e, m.e),
+        i: Math.min(had.i, m.i),
+        d: Math.min(had.d, m.d),
+        l: had.l + m.l
+      } : m;
+    });
+    return out;
+  }
   function grades(card) {
     const k = id(card);
     return MEM[k] || (MEM[k] = { n: 0, e: 2.5, i: 0, d: 0, l: 0 });
@@ -722,9 +746,9 @@ const PAIRS = [
   function keep() {
     save("src.mem", JSON.stringify(MEM));
     save("src.run", JSON.stringify({
-      t: dir + ":" + scope, r: round, d: done, h: hits, m: miss,
+      t: lang + ":" + scope, r: round, d: done, h: hits, m: miss,
       q: queue.map(function (x) {
-        return [id(POOL[x.i]), x.again, x.step, x.tried, x.misses];
+        return [id(POOL[x.i]), x.again, x.step, x.tried, x.misses, x.d];
       })
     }));
   }
@@ -736,8 +760,9 @@ const PAIRS = [
     done = hits = miss = 0;
     const order = shuffle(POOL.map(function (c, i) { return i; }));
     order.sort(function (a, b) { return when(POOL[a]) - when(POOL[b]); });
+    // a card keeps the side it was dealt, so a miss comes back the same way
     queue = order.map(function (i) {
-      return { i: i, again: 0, step: 0, tried: 0, misses: 0 };
+      return { i: i, again: 0, step: 0, tried: 0, misses: 0, d: side() };
     });
     keep();
   }
@@ -746,14 +771,17 @@ const PAIRS = [
   // deck has moved under it
   function resume() {
     const s = read("src.run");
-    if (!s || s.t !== dir + ":" + scope || !s.q || !s.q.length) return false;
+    if (!s || s.t !== lang + ":" + scope || !s.q || !s.q.length) return false;
     const at = {};
     POOL.forEach(function (c, i) { at[id(c)] = i; });
     queue = [];
     s.q.forEach(function (e) {
       const i = at[e[0]];
       if (i !== undefined) {
-        queue.push({ i: i, again: e[1], step: e[2], tried: e[3], misses: e[4] || 0 });
+        queue.push({
+          i: i, again: e[1], step: e[2],
+          tried: e[3], misses: e[4] || 0, d: e[5] ? 1 : 0
+        });
       }
     });
     if (!queue.length) return false;
@@ -770,7 +798,7 @@ const PAIRS = [
 
   function step() {
     cur = queue[0];
-    face(POOL[cur.i]);
+    face(POOL[cur.i], cur.d);
     status();
   }
 
@@ -911,11 +939,14 @@ const PAIRS = [
                         (back ? " · " + back + " Wiederholungen" : "");
   }
 
-  // a full round is the sum of every card's two phases at the current settings
+  // a full round is the sum of every card's two phases at the current settings;
+  // mixed lands somewhere between the two directions, so take the middle
   function roundLength() {
     let ms = 0;
     for (let i = 0; i < POOL.length; i++) {
-      ms += span(PROMPT_MS, POOL[i][dir]) + span(ANSWER_MS, POOL[i][1 - dir]);
+      const there = span(PROMPT_MS, POOL[i][0]) + span(ANSWER_MS, POOL[i][1]);
+      const back  = span(PROMPT_MS, POOL[i][1]) + span(ANSWER_MS, POOL[i][0]);
+      ms += lang === MIX ? (there + back) / 2 : (lang ? back : there);
     }
     const secs = Math.round(ms / 1000);
     total.textContent = POOL.length + " Vokabeln · " + Math.floor(secs / 60) +
@@ -936,18 +967,20 @@ const PAIRS = [
     place();
   }
 
-  const LABEL = ["Deutsch nach Englisch", "Englisch nach Deutsch"];
-  function setDir() {
-    from.textContent = dir ? "EN" : "DE";
-    to.textContent   = dir ? "DE" : "EN";
-    lang.setAttribute("aria-label", "Richtung: " + LABEL[dir]);
-    lang.setAttribute("title", "Richtung: " + LABEL[dir]);
+  const LABEL = ["Deutsch nach Englisch", "Englisch nach Deutsch", "gemischt"];
+  const ARROW = ["→", "→", "⇄"];
+  function setLang() {
+    from.textContent = lang === 1 ? "EN" : "DE";
+    to.textContent   = lang === 1 ? "DE" : "EN";
+    arrow.textContent = ARROW[lang];
+    langBtn.setAttribute("aria-label", "Richtung: " + LABEL[lang]);
+    langBtn.setAttribute("title", "Richtung: " + LABEL[lang]);
     status();
-    save("src.dir", dir);
+    save("src.lang", lang);
   }
-  lang.addEventListener("click", function () {
-    dir = 1 - dir;
-    setDir();
+  langBtn.addEventListener("click", function () {
+    lang = (lang + 1) % LABEL.length;
+    setLang();
     restart();
   });
 
@@ -986,11 +1019,12 @@ const PAIRS = [
 
   const savedPace = parseInt(load("src.pace"), 10);
   if (savedPace >= 0 && savedPace < PACE.length) speed.value = savedPace;
-  dir = load("src.dir") === "1" ? 1 : 0;
+  const savedLang = parseInt(load("src.lang") || load("src.dir"), 10);
+  if (savedLang >= 0 && savedLang < LABEL.length) lang = savedLang;
   const savedScope = parseInt(load("src.scope"), 10);
   if (savedScope >= 0 && savedScope < SCOPES.length) scope = savedScope;
   setPace();
-  setDir();
+  setLang();
   setScope();
   ready = true;
 
