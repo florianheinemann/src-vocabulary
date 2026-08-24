@@ -1,101 +1,101 @@
-﻿Deutsch;Englisch;Komplexität
-manövrierunfähig;not under command;mittel
-Schiff treibt manövrierunfähig;vessel is not under command, drifting;komplex
-Wassereinbruch;flooding;einfach
-Yacht sinkt nach Wassereinbruch;yacht is sinking after flooding;mittel
-starke Schlagseite nach Backbord;heavy list to port side;komplex
-Ruder gebrochen;rudder broken;mittel
-Ruderschaden;damaged rudder;mittel
-defekte Ruderanlage;defective steering gear;mittel
-gebrochener Mast;broken mast;einfach
-Motorschaden;engine trouble;einfach
-Maschinenraum · Motorraum;engine room;einfach
-nach einer Explosion;after explosion;einfach
-Schiff brennt;vessel on fire;einfach
-Feuer in den Aufbauten;fire in superstructures;mittel
-Feuer nicht unter Kontrolle;fire not under control;einfach
-Schiff in kritischem Zustand;ship is in critical condition;einfach
-Kollision mit Fischereifahrzeug;in collision with fishing vessel;komplex
-treiben auf die Sände zu;drifting towards the banks;mittel
-wir müssen das Schiff verlassen;we have to abandon the vessel;mittel
-benötigen sofortige Hilfe;require immediate assistance;einfach
-benötige Schlepperhilfe;require tug assistance;mittel
-Hilfe bei der Brandabwehr leisten;to assist in fire fighting;komplex
-diese Position ansteuern, um Hilfe zu leisten;to approach to this position for assistance;komplex
-Position, Kurs und Geschwindigkeit angeben;indicate position, course and speed;mittel
-für mögliche Hilfeleistung;for possible assistance;einfach
-benötigen Hubschrauber;require helicopter;einfach
-Person / Mensch über Bord;person over board;einfach
-zuletzt gesichtet um 0730 UTC;last seen at 0730 UTC;einfach
-Besatzungsmitglied;crew member;mittel
-schwer verletzt;seriously injured;einfach
-bewusstlos;unconscious;einfach
-Verdacht auf Herzinfarkt;suspect of heart attack;mittel
-benötige dringend ärztliche Hilfe;require urgent medical assistance;einfach
-medizinische Hilfe per Hubschrauber;medical assistance by helicopter;einfach
-ist vom Mast gefallen;has fallen off the mast;mittel
-Überlebende wurden nicht gesichtet;survivors were not sighted;mittel
-gekentertes Rettungsfloß;capsized life raft;mittel
-zwei Personen an Bord;two persons on board;einfach
-Schiffe in der Nähe werden gebeten …;ships in vicinity are requested to …;mittel
-die Schifffahrt wird gebeten …;shipping is requested to …;mittel
-scharf Ausschau halten;to keep sharp lookout;mittel
-der Seenotleitung Bremen berichten;report to Maritime Rescue Coordination Centre Bremen;komplex
-vorsichtig navigieren;to navigate carefully;einfach
-weder ankern noch Fischereigeschirr nutzen;neither to anchor nor to use fishing gear;komplex
-Abstand von mehr als 2 sm halten;to keep a berth of more than 2 nm;komplex
-Küstenwache;Coast Guard;einfach
-in der Nähe von;in vicinity of;mittel
-auf Position;in position;mittel
-Leucht- und Heultonne;light and whistle buoy;mittel
-als verlöscht gemeldet;is reported unlit;komplex
-Betonnung;buoyage;mittel
-Fahrwasser;fairway;mittel
-Verkehrstrennungsgebiet;traffic separation scheme;mittel
-Tiefwasserweg;deep water lane;mittel
-Nautische Warnung;navigational warning;mittel
-Nachrichten für Seefahrer;notices to mariners;mittel
-Unterwasser-Kabelarbeiten werden durchgeführt;underwater cable operations in progress;komplex
-wird durchgeführt werden vom … bis …;will be carried out from … to …;komplex
-laut;according to;einfach
-rote Raketen beobachtet;red rockets observed;einfach
-treibende 40-Fuß-Container, rot gestrichen;drifting 40-feet containers, red painted;mittel
-ein Container mit der Aufschrift …;one container marked with …;mittel
-den Anker verloren;has lost anchor;mittel
-rechtweisende Peilung 45 Grad;true bearing of 45 degrees;komplex
-rechtweisender Kurs;true course;komplex
-12 sm südlich Kap …;12 nm south of Cape …;mittel
-Seemeile (sm);nautical mile (nm);mittel
-Sturmwarnung;gale warning;mittel
-Vorhersagegebiet;forecast area;einfach
-Windstärke 8 bis 9;force 8 to 9;mittel
-zunehmend auf Sturmstärke;increasing to gale force;mittel
-abnehmend auf 7;decreasing to force 7;mittel
-rasch zunehmend;rapidly increasing;einfach
-rechtdrehend;veering;komplex
-linksdrehend;backing;komplex
-starke westliche Winde;strong westerly winds;mittel
-raue See;rough sea;einfach
-sehr schwere See;very rough sea;einfach
-hohe Dünung;high swell;mittel
-Sprühregen, zeitweise;drizzle at times;mittel
-Schauer;showers;einfach
-mäßige bis schlechte Sicht;moderate to poor visibility;einfach
-überfällig seit 16. Januar;overdue since January 16th;einfach
-unterwegs von … nach …;underway from … to …;mittel
-mit Bestimmungshafen Visby;bound for Visby;komplex
-ist bisher dort nicht eingetroffen;has not yet arrived there;mittel
-verließ Klintholm um 0600 Ortszeit;left Klintholm at 0600 local time;mittel
-Rumpf;hull;einfach
-Aufbauten;superstructures;einfach
-Segel;sails;einfach
-Länge 12 m;length 12 m;einfach
-Länge 40 Fuß;length 40 feet;einfach
-Motorschiff;M/V (motor vessel);mittel
-Rufzeichen;C/S (call sign);mittel
-Geschwindigkeit 13 Knoten;speed 13 knots;einfach
-folgendes empfangen auf UKW-Kanal 16;following received on VHF channel 16;komplex
-gesichtet;sighted;einfach
-beobachtet;observed;einfach
-in diesem Gebiet;in this area;einfach
-Komma;DECIMAL;komplex
+﻿Deutsch;Englisch
+manövrierunfähig;not under command
+Schiff treibt manövrierunfähig;vessel is not under command, drifting
+Wassereinbruch;flooding
+Yacht sinkt nach Wassereinbruch;yacht is sinking after flooding
+starke Schlagseite nach Backbord;heavy list to port side
+Ruder gebrochen;rudder broken
+Ruderschaden;damaged rudder
+defekte Ruderanlage;defective steering gear
+gebrochener Mast;broken mast
+Motorschaden;engine trouble
+Maschinenraum · Motorraum;engine room
+nach einer Explosion;after explosion
+Schiff brennt;vessel on fire
+Feuer in den Aufbauten;fire in superstructures
+Feuer nicht unter Kontrolle;fire not under control
+Schiff in kritischem Zustand;ship is in critical condition
+Kollision mit Fischereifahrzeug;in collision with fishing vessel
+treiben auf die Sände zu;drifting towards the banks
+wir müssen das Schiff verlassen;we have to abandon the vessel
+benötigen sofortige Hilfe;require immediate assistance
+benötige Schlepperhilfe;require tug assistance
+Hilfe bei der Brandabwehr leisten;to assist in fire fighting
+diese Position ansteuern, um Hilfe zu leisten;to approach to this position for assistance
+Position, Kurs und Geschwindigkeit angeben;indicate position, course and speed
+für mögliche Hilfeleistung;for possible assistance
+benötigen Hubschrauber;require helicopter
+Person / Mensch über Bord;person over board
+zuletzt gesichtet um 0730 UTC;last seen at 0730 UTC
+Besatzungsmitglied;crew member
+schwer verletzt;seriously injured
+bewusstlos;unconscious
+Verdacht auf Herzinfarkt;suspect of heart attack
+benötige dringend ärztliche Hilfe;require urgent medical assistance
+medizinische Hilfe per Hubschrauber;medical assistance by helicopter
+ist vom Mast gefallen;has fallen off the mast
+Überlebende wurden nicht gesichtet;survivors were not sighted
+gekentertes Rettungsfloß;capsized life raft
+zwei Personen an Bord;two persons on board
+Schiffe in der Nähe werden gebeten …;ships in vicinity are requested to …
+die Schifffahrt wird gebeten …;shipping is requested to …
+scharf Ausschau halten;to keep sharp lookout
+der Seenotleitung Bremen berichten;report to Maritime Rescue Coordination Centre Bremen
+vorsichtig navigieren;to navigate carefully
+weder ankern noch Fischereigeschirr nutzen;neither to anchor nor to use fishing gear
+Abstand von mehr als 2 sm halten;to keep a berth of more than 2 nm
+Küstenwache;Coast Guard
+in der Nähe von;in vicinity of
+auf Position;in position
+Leucht- und Heultonne;light and whistle buoy
+als verlöscht gemeldet;is reported unlit
+Betonnung;buoyage
+Fahrwasser;fairway
+Verkehrstrennungsgebiet;traffic separation scheme
+Tiefwasserweg;deep water lane
+Nautische Warnung;navigational warning
+Nachrichten für Seefahrer;notices to mariners
+Unterwasser-Kabelarbeiten werden durchgeführt;underwater cable operations in progress
+wird durchgeführt werden vom … bis …;will be carried out from … to …
+laut;according to
+rote Raketen beobachtet;red rockets observed
+treibende 40-Fuß-Container, rot gestrichen;drifting 40-feet containers, red painted
+ein Container mit der Aufschrift …;one container marked with …
+den Anker verloren;has lost anchor
+rechtweisende Peilung 45 Grad;true bearing of 45 degrees
+rechtweisender Kurs;true course
+12 sm südlich Kap …;12 nm south of Cape …
+Seemeile (sm);nautical mile (nm)
+Sturmwarnung;gale warning
+Vorhersagegebiet;forecast area
+Windstärke 8 bis 9;force 8 to 9
+zunehmend auf Sturmstärke;increasing to gale force
+abnehmend auf 7;decreasing to force 7
+rasch zunehmend;rapidly increasing
+rechtdrehend;veering
+linksdrehend;backing
+starke westliche Winde;strong westerly winds
+raue See;rough sea
+sehr schwere See;very rough sea
+hohe Dünung;high swell
+Sprühregen, zeitweise;drizzle at times
+Schauer;showers
+mäßige bis schlechte Sicht;moderate to poor visibility
+überfällig seit 16. Januar;overdue since January 16th
+unterwegs von … nach …;underway from … to …
+mit Bestimmungshafen Visby;bound for Visby
+ist bisher dort nicht eingetroffen;has not yet arrived there
+verließ Klintholm um 0600 Ortszeit;left Klintholm at 0600 local time
+Rumpf;hull
+Aufbauten;superstructures
+Segel;sails
+Länge 12 m;length 12 m
+Länge 40 Fuß;length 40 feet
+Motorschiff;M/V (motor vessel)
+Rufzeichen;C/S (call sign)
+Geschwindigkeit 13 Knoten;speed 13 knots
+folgendes empfangen auf UKW-Kanal 16;following received on VHF channel 16
+gesichtet;sighted
+beobachtet;observed
+in diesem Gebiet;in this area
+Komma;DECIMAL

@@ -39,13 +39,13 @@
     --mute: #3A6180;
   }
 
-  /* corner controls: theme dot right, the two switches left */
+  /* corner controls: theme dot right, the direction switch left */
   #theme, #switches {
     position: fixed;
     z-index: 3;
     top: calc(3vh + env(safe-area-inset-top));
   }
-  #lang, #scope {
+  #lang {
     padding: 0;
     border: none;
     background: none;
@@ -65,10 +65,9 @@
     transition: opacity 160ms ease, color 160ms ease;
     -webkit-tap-highlight-color: transparent;
   }
-  #theme:hover,  #theme:focus-visible,
-  #lang:hover,   #lang:focus-visible,
-  #scope:hover,  #scope:focus-visible { opacity: 1; color: var(--dim); }
-  #theme:focus-visible, #lang:focus-visible, #scope:focus-visible { outline: none; }
+  #theme:hover, #theme:focus-visible,
+  #lang:hover,  #lang:focus-visible { opacity: 1; color: var(--dim); }
+  #theme:focus-visible, #lang:focus-visible { outline: none; }
 
   /* theme toggle: outline = light, half = auto, filled = dark */
   #theme {
@@ -80,7 +79,7 @@
   :root[data-theme="auto"] #theme .half { opacity: 1; }
   :root[data-theme="dark"] #theme .full { opacity: 1; }
 
-  /* left switches: the direction being drilled, and which cards are in play */
+  /* left switch: the direction being drilled */
   #switches {
     left: calc(4vw + env(safe-area-inset-left));
     height: 22px;
@@ -88,7 +87,7 @@
     align-items: center;
     gap: .8em;
   }
-  #lang, #scope {
+  #lang {
     display: flex;
     align-items: center;
     gap: .45em;
@@ -100,13 +99,6 @@
     white-space: nowrap;
   }
   #lang .arrow { opacity: .6; }
-  #scope { text-transform: uppercase; }
-  #switches .sep {
-    width: 1px;
-    height: 11px;
-    background: var(--mute);
-    opacity: .35;
-  }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: var(--deep); }
@@ -361,8 +353,6 @@
     <button id="lang" type="button" aria-label="Richtung: Deutsch nach Englisch" title="Richtung: Deutsch nach Englisch">
       <span id="from">DE</span><span class="arrow">&#8594;</span><span id="to">EN</span>
     </button>
-    <span class="sep" aria-hidden="true"></span>
-    <button id="scope" type="button"></button>
   </div>
 
   <button id="theme" type="button" aria-label="Theme: auto" title="Theme: auto">
@@ -393,108 +383,108 @@
   </div>
 
 <script>
-// [German, English, complexity: 1 plain, 2 middling, 3 hard]
+// [German, English]
 const CARDS = [
-  ["manövrierunfähig", "not under command", 2],
-  ["Schiff treibt manövrierunfähig", "vessel is not under command, drifting", 3],
-  ["Wassereinbruch", "flooding", 1],
-  ["Yacht sinkt nach Wassereinbruch", "yacht is sinking after flooding", 2],
-  ["starke Schlagseite nach Backbord", "heavy list to port side", 3],
-  ["Ruder gebrochen", "rudder broken", 2],
-  ["Ruderschaden", "damaged rudder", 2],
-  ["defekte Ruderanlage", "defective steering gear", 2],
-  ["gebrochener Mast", "broken mast", 1],
-  ["Motorschaden", "engine trouble", 1],
-  ["Maschinenraum · Motorraum", "engine room", 1],
-  ["nach einer Explosion", "after explosion", 1],
-  ["Schiff brennt", "vessel on fire", 1],
-  ["Feuer in den Aufbauten", "fire in superstructures", 2],
-  ["Feuer nicht unter Kontrolle", "fire not under control", 1],
-  ["Schiff in kritischem Zustand", "ship is in critical condition", 1],
-  ["Kollision mit Fischereifahrzeug", "in collision with fishing vessel", 3],
-  ["treiben auf die Sände zu", "drifting towards the banks", 2],
-  ["wir müssen das Schiff verlassen", "we have to abandon the vessel", 2],
-  ["benötigen sofortige Hilfe", "require immediate assistance", 1],
-  ["benötige Schlepperhilfe", "require tug assistance", 2],
-  ["Hilfe bei der Brandabwehr leisten", "to assist in fire fighting", 3],
-  ["diese Position ansteuern, um Hilfe zu leisten", "to approach to this position for assistance", 3],
-  ["Position, Kurs und Geschwindigkeit angeben", "indicate position, course and speed", 2],
-  ["für mögliche Hilfeleistung", "for possible assistance", 1],
-  ["benötigen Hubschrauber", "require helicopter", 1],
-  ["Person / Mensch über Bord", "person over board", 1],
-  ["zuletzt gesichtet um 0730 UTC", "last seen at 0730 UTC", 1],
-  ["Besatzungsmitglied", "crew member", 2],
-  ["schwer verletzt", "seriously injured", 1],
-  ["bewusstlos", "unconscious", 1],
-  ["Verdacht auf Herzinfarkt", "suspect of heart attack", 2],
-  ["benötige dringend ärztliche Hilfe", "require urgent medical assistance", 1],
-  ["medizinische Hilfe per Hubschrauber", "medical assistance by helicopter", 1],
-  ["ist vom Mast gefallen", "has fallen off the mast", 2],
-  ["Überlebende wurden nicht gesichtet", "survivors were not sighted", 2],
-  ["gekentertes Rettungsfloß", "capsized life raft", 2],
-  ["zwei Personen an Bord", "two persons on board", 1],
-  ["Schiffe in der Nähe werden gebeten …", "ships in vicinity are requested to …", 2],
-  ["die Schifffahrt wird gebeten …", "shipping is requested to …", 2],
-  ["scharf Ausschau halten", "to keep sharp lookout", 2],
-  ["der Seenotleitung Bremen berichten", "report to Maritime Rescue Coordination Centre Bremen", 3],
-  ["vorsichtig navigieren", "to navigate carefully", 1],
-  ["weder ankern noch Fischereigeschirr nutzen", "neither to anchor nor to use fishing gear", 3],
-  ["Abstand von mehr als 2 sm halten", "to keep a berth of more than 2 nm", 3],
-  ["Küstenwache", "Coast Guard", 1],
-  ["in der Nähe von", "in vicinity of", 2],
-  ["auf Position", "in position", 2],
-  ["Leucht- und Heultonne", "light and whistle buoy", 2],
-  ["als verlöscht gemeldet", "is reported unlit", 3],
-  ["Betonnung", "buoyage", 2],
-  ["Fahrwasser", "fairway", 2],
-  ["Verkehrstrennungsgebiet", "traffic separation scheme", 2],
-  ["Tiefwasserweg", "deep water lane", 2],
-  ["Nautische Warnung", "navigational warning", 2],
-  ["Nachrichten für Seefahrer", "notices to mariners", 2],
-  ["Unterwasser-Kabelarbeiten werden durchgeführt", "underwater cable operations in progress", 3],
-  ["wird durchgeführt werden vom … bis …", "will be carried out from … to …", 3],
-  ["laut", "according to", 1],
-  ["rote Raketen beobachtet", "red rockets observed", 1],
-  ["treibende 40-Fuß-Container, rot gestrichen", "drifting 40-feet containers, red painted", 2],
-  ["ein Container mit der Aufschrift …", "one container marked with …", 2],
-  ["den Anker verloren", "has lost anchor", 2],
-  ["rechtweisende Peilung 45 Grad", "true bearing of 45 degrees", 3],
-  ["rechtweisender Kurs", "true course", 3],
-  ["12 sm südlich Kap …", "12 nm south of Cape …", 2],
-  ["Seemeile (sm)", "nautical mile (nm)", 2],
-  ["Sturmwarnung", "gale warning", 2],
-  ["Vorhersagegebiet", "forecast area", 1],
-  ["Windstärke 8 bis 9", "force 8 to 9", 2],
-  ["zunehmend auf Sturmstärke", "increasing to gale force", 2],
-  ["abnehmend auf 7", "decreasing to force 7", 2],
-  ["rasch zunehmend", "rapidly increasing", 1],
-  ["rechtdrehend", "veering", 3],
-  ["linksdrehend", "backing", 3],
-  ["starke westliche Winde", "strong westerly winds", 2],
-  ["raue See", "rough sea", 1],
-  ["sehr schwere See", "very rough sea", 1],
-  ["hohe Dünung", "high swell", 2],
-  ["Sprühregen, zeitweise", "drizzle at times", 2],
-  ["Schauer", "showers", 1],
-  ["mäßige bis schlechte Sicht", "moderate to poor visibility", 1],
-  ["überfällig seit 16. Januar", "overdue since January 16th", 1],
-  ["unterwegs von … nach …", "underway from … to …", 2],
-  ["mit Bestimmungshafen Visby", "bound for Visby", 3],
-  ["ist bisher dort nicht eingetroffen", "has not yet arrived there", 2],
-  ["verließ Klintholm um 0600 Ortszeit", "left Klintholm at 0600 local time", 2],
-  ["Rumpf", "hull", 1],
-  ["Aufbauten", "superstructures", 1],
-  ["Segel", "sails", 1],
-  ["Länge 12 m", "length 12 m", 1],
-  ["Länge 40 Fuß", "length 40 feet", 1],
-  ["Motorschiff", "M/V (motor vessel)", 2],
-  ["Rufzeichen", "C/S (call sign)", 2],
-  ["Geschwindigkeit 13 Knoten", "speed 13 knots", 1],
-  ["folgendes empfangen auf UKW-Kanal 16", "following received on VHF channel 16", 3],
-  ["gesichtet", "sighted", 1],
-  ["beobachtet", "observed", 1],
-  ["in diesem Gebiet", "in this area", 1],
-  ["Komma", "DECIMAL", 3]
+  ["manövrierunfähig", "not under command"],
+  ["Schiff treibt manövrierunfähig", "vessel is not under command, drifting"],
+  ["Wassereinbruch", "flooding"],
+  ["Yacht sinkt nach Wassereinbruch", "yacht is sinking after flooding"],
+  ["starke Schlagseite nach Backbord", "heavy list to port side"],
+  ["Ruder gebrochen", "rudder broken"],
+  ["Ruderschaden", "damaged rudder"],
+  ["defekte Ruderanlage", "defective steering gear"],
+  ["gebrochener Mast", "broken mast"],
+  ["Motorschaden", "engine trouble"],
+  ["Maschinenraum · Motorraum", "engine room"],
+  ["nach einer Explosion", "after explosion"],
+  ["Schiff brennt", "vessel on fire"],
+  ["Feuer in den Aufbauten", "fire in superstructures"],
+  ["Feuer nicht unter Kontrolle", "fire not under control"],
+  ["Schiff in kritischem Zustand", "ship is in critical condition"],
+  ["Kollision mit Fischereifahrzeug", "in collision with fishing vessel"],
+  ["treiben auf die Sände zu", "drifting towards the banks"],
+  ["wir müssen das Schiff verlassen", "we have to abandon the vessel"],
+  ["benötigen sofortige Hilfe", "require immediate assistance"],
+  ["benötige Schlepperhilfe", "require tug assistance"],
+  ["Hilfe bei der Brandabwehr leisten", "to assist in fire fighting"],
+  ["diese Position ansteuern, um Hilfe zu leisten", "to approach to this position for assistance"],
+  ["Position, Kurs und Geschwindigkeit angeben", "indicate position, course and speed"],
+  ["für mögliche Hilfeleistung", "for possible assistance"],
+  ["benötigen Hubschrauber", "require helicopter"],
+  ["Person / Mensch über Bord", "person over board"],
+  ["zuletzt gesichtet um 0730 UTC", "last seen at 0730 UTC"],
+  ["Besatzungsmitglied", "crew member"],
+  ["schwer verletzt", "seriously injured"],
+  ["bewusstlos", "unconscious"],
+  ["Verdacht auf Herzinfarkt", "suspect of heart attack"],
+  ["benötige dringend ärztliche Hilfe", "require urgent medical assistance"],
+  ["medizinische Hilfe per Hubschrauber", "medical assistance by helicopter"],
+  ["ist vom Mast gefallen", "has fallen off the mast"],
+  ["Überlebende wurden nicht gesichtet", "survivors were not sighted"],
+  ["gekentertes Rettungsfloß", "capsized life raft"],
+  ["zwei Personen an Bord", "two persons on board"],
+  ["Schiffe in der Nähe werden gebeten …", "ships in vicinity are requested to …"],
+  ["die Schifffahrt wird gebeten …", "shipping is requested to …"],
+  ["scharf Ausschau halten", "to keep sharp lookout"],
+  ["der Seenotleitung Bremen berichten", "report to Maritime Rescue Coordination Centre Bremen"],
+  ["vorsichtig navigieren", "to navigate carefully"],
+  ["weder ankern noch Fischereigeschirr nutzen", "neither to anchor nor to use fishing gear"],
+  ["Abstand von mehr als 2 sm halten", "to keep a berth of more than 2 nm"],
+  ["Küstenwache", "Coast Guard"],
+  ["in der Nähe von", "in vicinity of"],
+  ["auf Position", "in position"],
+  ["Leucht- und Heultonne", "light and whistle buoy"],
+  ["als verlöscht gemeldet", "is reported unlit"],
+  ["Betonnung", "buoyage"],
+  ["Fahrwasser", "fairway"],
+  ["Verkehrstrennungsgebiet", "traffic separation scheme"],
+  ["Tiefwasserweg", "deep water lane"],
+  ["Nautische Warnung", "navigational warning"],
+  ["Nachrichten für Seefahrer", "notices to mariners"],
+  ["Unterwasser-Kabelarbeiten werden durchgeführt", "underwater cable operations in progress"],
+  ["wird durchgeführt werden vom … bis …", "will be carried out from … to …"],
+  ["laut", "according to"],
+  ["rote Raketen beobachtet", "red rockets observed"],
+  ["treibende 40-Fuß-Container, rot gestrichen", "drifting 40-feet containers, red painted"],
+  ["ein Container mit der Aufschrift …", "one container marked with …"],
+  ["den Anker verloren", "has lost anchor"],
+  ["rechtweisende Peilung 45 Grad", "true bearing of 45 degrees"],
+  ["rechtweisender Kurs", "true course"],
+  ["12 sm südlich Kap …", "12 nm south of Cape …"],
+  ["Seemeile (sm)", "nautical mile (nm)"],
+  ["Sturmwarnung", "gale warning"],
+  ["Vorhersagegebiet", "forecast area"],
+  ["Windstärke 8 bis 9", "force 8 to 9"],
+  ["zunehmend auf Sturmstärke", "increasing to gale force"],
+  ["abnehmend auf 7", "decreasing to force 7"],
+  ["rasch zunehmend", "rapidly increasing"],
+  ["rechtdrehend", "veering"],
+  ["linksdrehend", "backing"],
+  ["starke westliche Winde", "strong westerly winds"],
+  ["raue See", "rough sea"],
+  ["sehr schwere See", "very rough sea"],
+  ["hohe Dünung", "high swell"],
+  ["Sprühregen, zeitweise", "drizzle at times"],
+  ["Schauer", "showers"],
+  ["mäßige bis schlechte Sicht", "moderate to poor visibility"],
+  ["überfällig seit 16. Januar", "overdue since January 16th"],
+  ["unterwegs von … nach …", "underway from … to …"],
+  ["mit Bestimmungshafen Visby", "bound for Visby"],
+  ["ist bisher dort nicht eingetroffen", "has not yet arrived there"],
+  ["verließ Klintholm um 0600 Ortszeit", "left Klintholm at 0600 local time"],
+  ["Rumpf", "hull"],
+  ["Aufbauten", "superstructures"],
+  ["Segel", "sails"],
+  ["Länge 12 m", "length 12 m"],
+  ["Länge 40 Fuß", "length 40 feet"],
+  ["Motorschiff", "M/V (motor vessel)"],
+  ["Rufzeichen", "C/S (call sign)"],
+  ["Geschwindigkeit 13 Knoten", "speed 13 knots"],
+  ["folgendes empfangen auf UKW-Kanal 16", "following received on VHF channel 16"],
+  ["gesichtet", "sighted"],
+  ["beobachtet", "observed"],
+  ["in diesem Gebiet", "in this area"],
+  ["Komma", "DECIMAL"]
 ];
   // pace scales a budget that grows with the phrase: reading time tracks
   // letters rather than words, so a German compound gets the time it needs.
@@ -511,7 +501,6 @@ const CARDS = [
   const marks = document.querySelectorAll("#marks span");
   const langBtn = document.getElementById("lang");
   const arrow = document.querySelector("#lang .arrow");
-  const scopeBtn = document.getElementById("scope");
   const dock  = document.getElementById("dock");
   const total = document.getElementById("total");
   const lap    = document.getElementById("lap");
@@ -521,15 +510,6 @@ const CARDS = [
   const to    = document.getElementById("to");
   const noBtn  = document.getElementById("wrong");
   const yesBtn = document.getElementById("right");
-
-  // which complexities are in play: everything, the harder two thirds, or the hardest
-  const SCOPES = [
-    { floor: 1, label: "Alle",    aria: "Auswahl: alle Vokabeln" },
-    { floor: 2, label: "Mittel+", aria: "Auswahl: mittlere und komplexe Vokabeln" },
-    { floor: 3, label: "Komplex", aria: "Auswahl: nur komplexe Vokabeln" }
-  ];
-  let scope = 0;
-  let POOL = CARDS;
 
   // the last stop on the slider is not a pace but the hand-turned card drill
   const CARD = 4;
@@ -558,7 +538,7 @@ const CARDS = [
 
   // every phrase comes up once per round; a reshuffle never repeats the last one
   function refill() {
-    deck = POOL.map(function (c, i) { return i; });
+    deck = CARDS.map(function (c, i) { return i; });
     shuffle(deck);
     if (deck[deck.length - 1] === last && deck.length > 1) {
       [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
@@ -576,7 +556,7 @@ const CARDS = [
 
   function draw() {
     last = deck.pop();
-    return POOL[last];
+    return CARDS[last];
   }
 
   // an empty deck means the round is over: mark it, then roll straight on
@@ -742,9 +722,9 @@ const CARDS = [
   function keep() {
     save("src.mem", JSON.stringify(MEM));
     save("src.run", JSON.stringify({
-      t: lang + ":" + scope, r: round, d: done, h: hits, m: miss,
+      t: String(lang), r: round, d: done, h: hits, m: miss,
       q: queue.map(function (x) {
-        return [id(POOL[x.i]), x.again, x.step, x.tried, x.misses, x.d];
+        return [id(CARDS[x.i]), x.again, x.step, x.tried, x.misses, x.d];
       })
     }));
   }
@@ -754,8 +734,8 @@ const CARDS = [
   function newRound(n) {
     round = n;
     done = hits = miss = 0;
-    const order = shuffle(POOL.map(function (c, i) { return i; }));
-    order.sort(function (a, b) { return when(POOL[a]) - when(POOL[b]); });
+    const order = shuffle(CARDS.map(function (c, i) { return i; }));
+    order.sort(function (a, b) { return when(CARDS[a]) - when(CARDS[b]); });
     // a card keeps the side it was dealt, so a miss comes back the same way
     queue = order.map(function (i) {
       return { i: i, again: 0, step: 0, tried: 0, misses: 0, d: side() };
@@ -767,9 +747,9 @@ const CARDS = [
   // deck has moved under it
   function resume() {
     const s = read("src.run");
-    if (!s || s.t !== lang + ":" + scope || !s.q || !s.q.length) return false;
+    if (!s || s.t !== String(lang) || !s.q || !s.q.length) return false;
     const at = {};
-    POOL.forEach(function (c, i) { at[id(c)] = i; });
+    CARDS.forEach(function (c, i) { at[id(c)] = i; });
     queue = [];
     s.q.forEach(function (e) {
       const i = at[e[0]];
@@ -794,7 +774,7 @@ const CARDS = [
 
   function step() {
     cur = queue[0];
-    face(POOL[cur.i], cur.d);
+    face(CARDS[cur.i], cur.d);
     status();
   }
 
@@ -811,7 +791,7 @@ const CARDS = [
   // has to be met twice before it leaves
   function grade(ok) {
     if (!cards || !revealed || busy || !cur) return;
-    const m = grades(POOL[cur.i]);
+    const m = grades(CARDS[cur.i]);
     if (ok) {
       m.n++;
       m.i = m.n === 1 ? 1 : m.n === 2 ? 3 : Math.max(1, Math.round(m.i * m.e));
@@ -931,7 +911,7 @@ const CARDS = [
     if (!cards) return roundLength();
     if (!round) return;             // nothing drawn yet
     const back = queue.reduce(function (n, x) { return n + (x.again ? 1 : 0); }, 0);
-    total.textContent = "Runde " + round + " · " + done + " von " + POOL.length +
+    total.textContent = "Runde " + round + " · " + done + " von " + CARDS.length +
                         (back ? " · " + back + " Wiederholungen" : "");
   }
 
@@ -939,13 +919,13 @@ const CARDS = [
   // mixed lands somewhere between the two directions, so take the middle
   function roundLength() {
     let ms = 0;
-    for (let i = 0; i < POOL.length; i++) {
-      const there = span(PROMPT_MS, POOL[i][0]) + span(ANSWER_MS, POOL[i][1]);
-      const back  = span(PROMPT_MS, POOL[i][1]) + span(ANSWER_MS, POOL[i][0]);
+    for (let i = 0; i < CARDS.length; i++) {
+      const there = span(PROMPT_MS, CARDS[i][0]) + span(ANSWER_MS, CARDS[i][1]);
+      const back  = span(PROMPT_MS, CARDS[i][1]) + span(ANSWER_MS, CARDS[i][0]);
       ms += lang === MIX ? (there + back) / 2 : (lang ? back : there);
     }
     const secs = Math.round(ms / 1000);
-    total.textContent = POOL.length + " Vokabeln · " + Math.floor(secs / 60) +
+    total.textContent = CARDS.length + " Vokabeln · " + Math.floor(secs / 60) +
                         ":" + ("0" + (secs % 60)).slice(-2) + " min pro Runde";
   }
 
@@ -980,21 +960,6 @@ const CARDS = [
     restart();
   });
 
-  function setScope() {
-    const s = SCOPES[scope];
-    POOL = CARDS.filter(function (c) { return c[2] >= s.floor; });
-    scopeBtn.textContent = s.label;
-    scopeBtn.setAttribute("aria-label", s.aria);
-    scopeBtn.setAttribute("title", s.aria);
-    status();
-    save("src.scope", scope);
-  }
-  scopeBtn.addEventListener("click", function () {
-    scope = (scope + 1) % SCOPES.length;
-    setScope();
-    restart();
-  });
-
   // theme: auto -> light -> dark -> auto
   const THEMES = ["auto", "light", "dark"];
   const root  = document.documentElement;
@@ -1017,11 +982,8 @@ const CARDS = [
   if (savedPace >= 0 && savedPace < PACE.length) speed.value = savedPace;
   const savedLang = parseInt(load("src.lang") || load("src.dir"), 10);
   if (savedLang >= 0 && savedLang < LABEL.length) lang = savedLang;
-  const savedScope = parseInt(load("src.scope"), 10);
-  if (savedScope >= 0 && savedScope < SCOPES.length) scope = savedScope;
   setPace();
   setLang();
-  setScope();
   ready = true;
 
   speed.addEventListener("input", setPace);
