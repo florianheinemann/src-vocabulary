@@ -155,14 +155,18 @@
   #wrap.reveal #tail { opacity: 1; }
   #wrap.instant, #wrap.instant #tail { transition: none; }
 
-  /* pace control */
-  #pace {
+  /* the dock carries the verdicts, the pace slider and the status line */
+  #dock {
     z-index: 2;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
     bottom: calc(4vh + env(safe-area-inset-bottom));
-    width: min(82vw, 360px);
+    width: min(84vw, 420px);
+  }
+  #pace {
+    width: min(100%, 360px);
+    margin: 0 auto;
   }
   #speed {
     -webkit-appearance: none;
@@ -223,6 +227,78 @@
   #marks span:nth-child(5) { left: calc(100% - 7px); }
   #marks span.on { color: var(--dim); }
 
+  /* one row holds the hint before the reveal and the verdicts after, so the
+     field above keeps its height and the type never resizes mid-card */
+  #answer { display: none; }
+  body.cards #answer {
+    display: grid;
+    margin-bottom: 2em;
+  }
+  #answer > * { grid-area: 1 / 1; }
+  #hint, #judge { transition: opacity 180ms ease; }
+  #hint {
+    align-self: center;
+    text-align: center;
+    pointer-events: none;   /* it sits over the verdicts, so it must not catch them */
+    font-size: clamp(8px, 1.4vmin, 11px);
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  #hint .click { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    #hint .tap { display: none; }
+    #hint .click { display: inline; }
+  }
+  #judge {
+    display: flex;
+    gap: .7em;
+    opacity: 0;
+  }
+  body.shown #judge { opacity: 1; }
+  body.shown #hint { opacity: 0; }
+  .verdict {
+    flex: 1;
+    min-height: clamp(46px, 8.5vh, 64px);
+    padding: 0 .5em;
+    border: 1.5px solid var(--dim);
+    border-radius: 3px;
+    background: none;
+    color: var(--dim);
+    font: inherit;
+    font-size: clamp(10px, 1.9vmin, 14px);
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 140ms ease, color 140ms ease,
+                border-color 140ms ease, transform 120ms ease;
+  }
+  .verdict:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dim) 30%, transparent);
+  }
+  .verdict:active { transform: scale(.98); }
+  #wrong { border-color: var(--mute); color: var(--mute); }
+  #wrong:hover, #wrong:focus-visible { border-color: var(--dim); color: var(--dim); }
+  #right { background: var(--dim); border-color: var(--dim); color: var(--deep); }
+  #right:hover, #right:focus-visible { background: var(--lead); border-color: var(--lead); }
+
+  /* the card waits for a tap, so the field reads as the thing you press —
+     and a tap on a word must never turn into a text selection */
+  body.cards:not(.shown) #wrap { cursor: pointer; }
+  body.cards {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* the drill turns cards by hand: the field settles faster than on a timer */
+  body.cards #wrap {
+    transition: transform 220ms cubic-bezier(.22,.7,.3,1), opacity 130ms ease;
+  }
+
   #total {
     margin-top: .7em;
     text-align: center;
@@ -255,6 +331,12 @@
     text-transform: uppercase;
     color: var(--dim);
   }
+  #lap #lapsub {
+    font-size: clamp(9px, 1.7vmin, 13px);
+    letter-spacing: .2em;
+    color: var(--mute);
+  }
+  #lap #lapsub:empty { display: none; }
   #lap .rule {
     display: block;
     width: min(46vw, 320px);
@@ -266,7 +348,8 @@
   #lap.on .rule { transform: scaleX(1); }
 
   @media (prefers-reduced-motion: reduce) {
-    #wrap, #tail, #lap, #lap .rule { transition: none; }
+    #wrap, body.cards #wrap, #tail, #lap, #lap .rule,
+    #hint, #judge, .verdict { transition: none; }
     #lap .rule { transform: scaleX(1); }
   }
 </style>
@@ -292,11 +375,20 @@
 
   <div id="wrap"><span id="head"></span><span id="tail"></span></div>
 
-  <div id="lap" aria-hidden="true"><span id="lapnum"></span><i class="rule"></i></div>
+  <div id="lap" aria-hidden="true"><span id="lapnum"></span><i class="rule"></i><span id="lapsub"></span></div>
 
-  <div id="pace">
-    <input id="speed" type="range" min="0" max="4" step="1" value="2" aria-label="Tempo">
-    <div id="marks"><span>Flott</span><span>Zügig</span><span>Normal</span><span>Ruhig</span><span>Langsam</span></div>
+  <div id="dock">
+    <div id="answer">
+      <div id="hint" aria-hidden="true"><span class="tap">Tippen zum Aufdecken</span><span class="click">Klicken zum Aufdecken</span></div>
+      <div id="judge">
+        <button id="wrong" class="verdict" type="button" disabled>Falsch</button>
+        <button id="right" class="verdict" type="button" disabled>Richtig</button>
+      </div>
+    </div>
+    <div id="pace">
+      <input id="speed" type="range" min="0" max="4" step="1" value="2" aria-label="Tempo und Modus">
+      <div id="marks"><span>Flott</span><span>Zügig</span><span>Normal</span><span>Ruhig</span><span>Karten</span></div>
+    </div>
     <div id="total" aria-live="polite"></div>
   </div>
 
@@ -396,8 +488,9 @@ const PAIRS = [
   ["Komma", "DECIMAL", 3],
 ];
   // pace scales a budget that grows with the phrase: reading time tracks
-  // letters rather than words, so a German compound gets the time it needs
-  const PACE = [0.45, 0.62, 0.85, 1.15, 1.55];
+  // letters rather than words, so a German compound gets the time it needs.
+  // the fifth stop is not a pace at all but the card drill, so it never scales
+  const PACE = [0.45, 0.62, 0.85, 1.15, null];
   const PROMPT_MS = [800, 120];   // [fixed, per letter] before the reveal
   const ANSWER_MS = [650, 90];    // [fixed, per letter] once the pair is up
   const FLOOR = 800, CEILING = 9000;
@@ -409,19 +502,22 @@ const PAIRS = [
   const marks = document.querySelectorAll("#marks span");
   const lang  = document.getElementById("lang");
   const scopeBtn = document.getElementById("scope");
-  const bar   = document.getElementById("pace");
+  const dock  = document.getElementById("dock");
   const total = document.getElementById("total");
   const lap    = document.getElementById("lap");
   const lapnum = document.getElementById("lapnum");
+  const lapsub = document.getElementById("lapsub");
   const from  = document.getElementById("from");
   const to    = document.getElementById("to");
+  const noBtn  = document.getElementById("wrong");
+  const yesBtn = document.getElementById("right");
 
   // an entry that pairs terms with a dot is really two vocabulary items;
   // split it when both sides list the same number of terms, otherwise the
   // dot marks synonyms sharing one translation and the entry stays whole
   const CARDS = [];
   PAIRS.forEach(function (pair) {
-    const a = pair[0].split("\u00B7"), b = pair[1].split("\u00B7");
+    const a = pair[0].split("·"), b = pair[1].split("·");
     if (a.length > 1 && a.length === b.length) {
       for (let i = 0; i < a.length; i++) CARDS.push([a[i].trim(), b[i].trim(), pair[2]]);
     } else {
@@ -438,12 +534,16 @@ const PAIRS = [
   let scope = 0;
   let POOL = CARDS;
 
+  // the last stop on the slider is not a pace but the hand-turned card drill
+  const CARD = 4;
   let pace = 2;
+  let cards = false;
   let dir = 0;                 // 0 = DE -> EN, 1 = EN -> DE
   let revealed = false;
   let deck = [], last = null;
   let timer = null;
   let round = 0, running = false;
+  let ready = false;
 
   // settings persist in localStorage; silently ignored where it's unavailable
   function load(key) {
@@ -452,18 +552,28 @@ const PAIRS = [
   function save(key, value) {
     try { localStorage.setItem(key, value); } catch (e) { /* no storage, no problem */ }
   }
+  function read(key) {
+    try { return JSON.parse(load(key)); } catch (e) { return null; }
+  }
+
+  /* ---- ticker: every phrase once per round, on a timer -------------------- */
 
   // every phrase comes up once per round; a reshuffle never repeats the last one
   function refill() {
     deck = POOL.map(function (c, i) { return i; });
-    for (let j = deck.length - 1; j > 0; j--) {
-      const k = Math.floor(Math.random() * (j + 1));
-      [deck[j], deck[k]] = [deck[k], deck[j]];
-    }
+    shuffle(deck);
     if (deck[deck.length - 1] === last && deck.length > 1) {
       [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
     }
     round++;
+  }
+
+  function shuffle(a) {
+    for (let j = a.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [a[j], a[k]] = [a[k], a[j]];
+    }
+    return a;
   }
 
   function draw() {
@@ -485,6 +595,7 @@ const PAIRS = [
     timer = setTimeout(function () {
       refill();
       lapnum.textContent = "Runde " + round;
+      lapsub.textContent = "";
       lap.classList.add("on");
       timer = setTimeout(function () {
         lap.classList.remove("on");
@@ -493,6 +604,8 @@ const PAIRS = [
       }, 1150);
     }, 300);
   }
+
+  /* ---- the field --------------------------------------------------------- */
 
   // a compound too long to break stays on one line and runs past the edge of
   // the field without making the block any taller, so measure the line boxes
@@ -510,7 +623,7 @@ const PAIRS = [
   // phrases run long, so the type shrinks until the pair clears the controls
   function fit() {
     // reserve whatever the control block actually occupies, plus air
-    const reserve = window.innerHeight - bar.getBoundingClientRect().top + 16;
+    const reserve = window.innerHeight - dock.getBoundingClientRect().top + 16;
     const room = window.innerHeight / 2 - reserve;
     const maxW = wrap.clientWidth;
     const min  = 13;
@@ -539,6 +652,21 @@ const PAIRS = [
     void wrap.offsetWidth;
   }
 
+  // the pair rises into place and the translation fades up under the prompt
+  function lift() {
+    wrap.classList.remove("instant");
+    void wrap.offsetWidth;
+    wrap.style.transform = "translateY(0)";
+    wrap.classList.add("reveal");
+  }
+
+  function clear() {
+    revealed = false;
+    wrap.classList.remove("reveal");
+    document.body.classList.remove("shown");
+    noBtn.disabled = yesBtn.disabled = true;
+  }
+
   // spaces and punctuation cost no reading time worth counting; the class is
   // Unicode-aware so Umlaute and ß count like any other letter
   function letters(text) {
@@ -550,34 +678,237 @@ const PAIRS = [
   }
 
   function showPrompt() {
-    const pair = draw();
-    revealed = false;
-    wrap.classList.remove("reveal");
-    head.textContent = pair[dir];
-    tail.textContent = pair[1 - dir];
-    fit();
-    place();
+    face(draw());
     timer = setTimeout(showAnswer, span(PROMPT_MS, head.textContent));
   }
 
   function showAnswer() {
     revealed = true;
-    wrap.classList.remove("instant");
-    void wrap.offsetWidth;
-    wrap.style.transform = "translateY(0)";
-    wrap.classList.add("reveal");
+    lift();
     timer = setTimeout(next, span(ANSWER_MS, tail.textContent));
   }
+
+  // put a pair on the field, prompt up, translation held back
+  function face(pair) {
+    clear();
+    head.textContent = pair[dir];
+    tail.textContent = pair[1 - dir];
+    fit();
+    place();
+  }
+
+  /* ---- card drill: turned by hand, spaced by hand ------------------------- */
+
+  const DAY = 864e5;
+  const AGAIN = 3, AGAIN_AGAIN = 9;  // how far back a card drops when it comes back
+  const STUCK = 3;                   // misses in one round before it is set aside
+  let MEM = read("src.mem") || {};
+  let queue = [], cur = null;
+  let done = 0, hits = 0, miss = 0;
+  let busy = false;
+
+  // one record per card and direction: recalling a word is not the same skill
+  // as producing it, so each side of the pair earns its own interval
+  function id(card) { return card[0] + "␟" + card[1] + "␟" + dir; }
+  function grades(card) {
+    const k = id(card);
+    return MEM[k] || (MEM[k] = { n: 0, e: 2.5, i: 0, d: 0, l: 0 });
+  }
+  function when(card) {
+    const m = MEM[id(card)];
+    return m ? m.d : 0;
+  }
+
+  function keep() {
+    save("src.mem", JSON.stringify(MEM));
+    save("src.run", JSON.stringify({
+      t: dir + ":" + scope, r: round, d: done, h: hits, m: miss,
+      q: queue.map(function (x) {
+        return [id(POOL[x.i]), x.again, x.step, x.tried, x.misses];
+      })
+    }));
+  }
+
+  // the round always holds the whole pool — what the spacing decides is the
+  // order: unseen and overdue cards lead, long intervals trail behind
+  function newRound(n) {
+    round = n;
+    done = hits = miss = 0;
+    const order = shuffle(POOL.map(function (c, i) { return i; }));
+    order.sort(function (a, b) { return when(POOL[a]) - when(POOL[b]); });
+    queue = order.map(function (i) {
+      return { i: i, again: 0, step: 0, tried: 0, misses: 0 };
+    });
+    keep();
+  }
+
+  // pick the round back up where it was left, as long as nothing about the
+  // deck has moved under it
+  function resume() {
+    const s = read("src.run");
+    if (!s || s.t !== dir + ":" + scope || !s.q || !s.q.length) return false;
+    const at = {};
+    POOL.forEach(function (c, i) { at[id(c)] = i; });
+    queue = [];
+    s.q.forEach(function (e) {
+      const i = at[e[0]];
+      if (i !== undefined) {
+        queue.push({ i: i, again: e[1], step: e[2], tried: e[3], misses: e[4] || 0 });
+      }
+    });
+    if (!queue.length) return false;
+    round = s.r || 1;
+    done = s.d || 0; hits = s.h || 0; miss = s.m || 0;
+    return true;
+  }
+
+  function startCards() {
+    busy = false;
+    if (!resume()) newRound(1);
+    step();
+  }
+
+  function step() {
+    cur = queue[0];
+    face(POOL[cur.i]);
+    status();
+  }
+
+  function flip() {
+    if (!cards || revealed || busy || lap.classList.contains("on")) return;
+    revealed = true;
+    lift();
+    document.body.classList.add("shown");
+    noBtn.disabled = yesBtn.disabled = false;
+  }
+
+  // the verdict feeds both clocks: the long-term interval on the card, and the
+  // backlog of this round, where a miss drops the card a few places back and
+  // has to be met twice before it leaves
+  function grade(ok) {
+    if (!cards || !revealed || busy || !cur) return;
+    const m = grades(POOL[cur.i]);
+    if (ok) {
+      m.n++;
+      m.i = m.n === 1 ? 1 : m.n === 2 ? 3 : Math.max(1, Math.round(m.i * m.e));
+      m.e = Math.min(2.8, m.e + 0.05);
+      m.d = Date.now() + m.i * DAY;
+    } else {
+      m.n = 0;
+      m.l++;
+      m.i = 0;
+      m.e = Math.max(1.3, m.e - 0.2);
+      m.d = Date.now();
+    }
+    // the round's score counts first sight only, repeats are the drill working
+    if (!cur.tried) { cur.tried = 1; if (ok) hits++; else miss++; }
+    queue.shift();
+    if (!ok) {
+      cur.again = 1;
+      cur.step = 0;
+      cur.misses++;
+      // a card that keeps going down is set aside rather than held in front of
+      // the others; it stays due, so it leads the next round instead
+      if (cur.misses >= STUCK) done++;
+      else requeue(AGAIN);
+    } else if (cur.again && cur.step === 0) {
+      cur.step = 1;
+      requeue(AGAIN_AGAIN);
+    } else {
+      done++;
+    }
+    keep();
+    turn();
+  }
+
+  function requeue(gap) {
+    queue.splice(Math.min(gap, queue.length), 0, cur);
+  }
+
+  function turn() {
+    busy = true;
+    clear();
+    status();
+    wrap.classList.add("hide");
+    timer = setTimeout(function () {
+      if (!queue.length) return finish();
+      step();
+      busy = false;
+      fade();
+    }, 150);
+  }
+
+  function fade() {
+    wrap.classList.remove("instant");
+    void wrap.offsetWidth;
+    wrap.classList.remove("hide");
+  }
+
+  // the round is only through once every repetition has been met as well
+  function finish() {
+    lapnum.textContent = "Runde " + round;
+    lapsub.textContent = (hits + miss)
+      ? Math.round(hits * 100 / (hits + miss)) + " % auf Anhieb"
+      : "";
+    lap.classList.add("on");
+    timer = setTimeout(function () {
+      lap.classList.remove("on");
+      lapsub.textContent = "";
+      newRound(round + 1);
+      step();
+      busy = false;
+      fade();
+    }, 1900);
+  }
+
+  noBtn.addEventListener("click", function () { grade(false); });
+  yesBtn.addEventListener("click", function () { grade(true); });
+
+  // the field itself is the reveal: anywhere but the controls turns the card
+  document.addEventListener("click", function (e) {
+    if (!cards || revealed) return;
+    if (e.target.closest && e.target.closest("#dock, #switches, #theme")) return;
+    flip();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (!cards || busy || lap.classList.contains("on")) return;
+    const on = (e.target && e.target.tagName) || "";
+    if (on === "INPUT" || on === "BUTTON") return;   // the control keeps its own keys
+    if (!revealed) {
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
+      return;
+    }
+    if (e.key === "1" || e.key === "ArrowLeft") { e.preventDefault(); grade(false); }
+    if (e.key === "2" || e.key === "ArrowRight" || e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      grade(true);
+    }
+  });
+
+  /* ---- controls ---------------------------------------------------------- */
 
   function restart() {
     clearTimeout(timer);
     lap.classList.remove("on");
+    lapsub.textContent = "";
     wrap.classList.remove("hide");
+    busy = false;
+    clear();
+    if (cards) return startCards();
     deck = [];
     last = null;
     round = 0;
     running = false;
     next();
+  }
+
+  function status() {
+    if (!cards) return roundLength();
+    if (!round) return;             // nothing drawn yet
+    const back = queue.reduce(function (n, x) { return n + (x.again ? 1 : 0); }, 0);
+    total.textContent = "Runde " + round + " · " + done + " von " + POOL.length +
+                        (back ? " · " + back + " Wiederholungen" : "");
   }
 
   // a full round is the sum of every card's two phases at the current settings
@@ -592,12 +923,17 @@ const PAIRS = [
   }
 
   function setPace() {
+    const was = cards;
     pace = +speed.value;
+    cards = pace === CARD;
     marks.forEach((m, n) => m.classList.toggle("on", n === pace));
-    roundLength();
+    document.body.classList.toggle("cards", cards);
+    save("src.pace", pace);
+    if (!ready) return;
+    if (was !== cards) restart();
+    status();
     fit();
     place();
-    save("src.pace", pace);
   }
 
   const LABEL = ["Deutsch nach Englisch", "Englisch nach Deutsch"];
@@ -606,7 +942,7 @@ const PAIRS = [
     to.textContent   = dir ? "DE" : "EN";
     lang.setAttribute("aria-label", "Richtung: " + LABEL[dir]);
     lang.setAttribute("title", "Richtung: " + LABEL[dir]);
-    roundLength();
+    status();
     save("src.dir", dir);
   }
   lang.addEventListener("click", function () {
@@ -621,7 +957,7 @@ const PAIRS = [
     scopeBtn.textContent = s.label;
     scopeBtn.setAttribute("aria-label", s.aria);
     scopeBtn.setAttribute("title", s.aria);
-    roundLength();
+    status();
     save("src.scope", scope);
   }
   scopeBtn.addEventListener("click", function () {
@@ -651,19 +987,20 @@ const PAIRS = [
   const savedPace = parseInt(load("src.pace"), 10);
   if (savedPace >= 0 && savedPace < PACE.length) speed.value = savedPace;
   dir = load("src.dir") === "1" ? 1 : 0;
-  setDir();
   const savedScope = parseInt(load("src.scope"), 10);
   if (savedScope >= 0 && savedScope < SCOPES.length) scope = savedScope;
+  setPace();
+  setDir();
   setScope();
+  ready = true;
 
   speed.addEventListener("input", setPace);
   window.addEventListener("resize", function () { fit(); place(); });
-  setPace();
 
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(next);
+    document.fonts.ready.then(function () { restart(); });
   } else {
-    next();
+    restart();
   }
 </script>
 </body>
