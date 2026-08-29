@@ -579,16 +579,41 @@ const CARDS = [
     return POOL.length * sides().length;
   }
 
+  // splits the pool into two layers, each card contributing one entry, its
+  // direction dealt at random rather than fixed per layer — so each layer is
+  // itself a mix of directions, and a card's two directions always land in
+  // different layers, never next to each other once the layers are joined
+  function deal() {
+    const first = [], second = [];
+    POOL.forEach(function (i) {
+      const ds = shuffle(sides().slice());
+      first.push({ i: i, d: ds[0] });
+      if (ds.length > 1) second.push({ i: i, d: ds[1] });
+    });
+    return [first, second];
+  }
+
+  // the seam between the layers is the one place a repeat could still land
+  // back to back; on the rare shuffle where it would, swap it out of the way
+  function join(layers) {
+    const first = layers[0], second = layers[1];
+    if (second.length > 1 && first.length &&
+        first[first.length - 1].i === second[0].i) {
+      const k = 1 + Math.floor(Math.random() * (second.length - 1));
+      [second[0], second[k]] = [second[k], second[0]];
+    }
+    return first.concat(second);
+  }
+
   /* ---- ticker: every phrase once per round, on a timer -------------------- */
 
   // every phrase comes up once per round in each direction it's set to —
-  // mixed enters it twice; a reshuffle never repeats the last card drawn
+  // mixed enters it twice, spread apart rather than back to back; a reshuffle
+  // never repeats the last card drawn
   function refill() {
-    deck = [];
-    POOL.forEach(function (i) {
-      sides().forEach(function (d) { deck.push({ i: i, d: d }); });
-    });
-    shuffle(deck);
+    const layers = deal();
+    layers.forEach(shuffle);
+    deck = join(layers);
     if (last && deck.length > 1 && deck[deck.length - 1].i === last.i) {
       [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
     }
@@ -781,18 +806,18 @@ const CARDS = [
 
   // the round always holds the whole pool — what the spacing decides is the
   // order: unseen and overdue cards lead, long intervals trail behind. mixed
-  // enters every card twice, once per direction, so both get drilled
+  // enters every card twice, once per direction, spread apart so both get
+  // drilled without one giving the other away
   function newRound(n) {
     round = n;
     done = hits = miss = 0;
-    const order = [];
-    POOL.forEach(function (i) {
-      sides().forEach(function (d) { order.push({ i: i, d: d }); });
+    const layers = deal();
+    layers.forEach(function (layer) {
+      shuffle(layer);
+      layer.sort(function (a, b) { return when(CARDS[a.i], a.d) - when(CARDS[b.i], b.d); });
     });
-    shuffle(order);
-    order.sort(function (a, b) { return when(CARDS[a.i], a.d) - when(CARDS[b.i], b.d); });
     // a card keeps the side it was dealt, so a miss comes back the same way
-    queue = order.map(function (e) {
+    queue = join(layers).map(function (e) {
       return { i: e.i, again: 0, step: 0, tried: 0, misses: 0, d: e.d };
     });
     keep();
