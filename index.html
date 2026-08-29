@@ -568,13 +568,28 @@ const CARDS = [
       .filter(function (i) { return level === 0 || CARDS[i][2] !== "simple"; });
   }
 
+  // mixed drills both directions of every card; DE-only and EN-only each
+  // drill just the one they're set to
+  function sides() {
+    return lang === MIX ? [0, 1] : [lang];
+  }
+
+  // how many prompts a full round holds: the pool, times one entry per side
+  function roundSize() {
+    return POOL.length * sides().length;
+  }
+
   /* ---- ticker: every phrase once per round, on a timer -------------------- */
 
-  // every phrase comes up once per round; a reshuffle never repeats the last one
+  // every phrase comes up once per round in each direction it's set to —
+  // mixed enters it twice; a reshuffle never repeats the last card drawn
   function refill() {
-    deck = POOL.slice();
+    deck = [];
+    POOL.forEach(function (i) {
+      sides().forEach(function (d) { deck.push({ i: i, d: d }); });
+    });
     shuffle(deck);
-    if (deck[deck.length - 1] === last && deck.length > 1) {
+    if (last && deck.length > 1 && deck[deck.length - 1].i === last.i) {
       [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
     }
     round++;
@@ -590,7 +605,7 @@ const CARDS = [
 
   function draw() {
     last = deck.pop();
-    return CARDS[last];
+    return last;
   }
 
   // an empty deck means the round is over: mark it, then roll straight on
@@ -690,7 +705,8 @@ const CARDS = [
   }
 
   function showPrompt() {
-    face(draw(), side());
+    const e = draw();
+    face(CARDS[e.i], e.d);
     timer = setTimeout(showAnswer, span(PROMPT_MS, head.textContent));
   }
 
@@ -698,11 +714,6 @@ const CARDS = [
     revealed = true;
     lift();
     timer = setTimeout(next, span(ANSWER_MS, tail.textContent));
-  }
-
-  // mixed draws a side per card, so a word can come up either way round
-  function side() {
-    return lang === MIX ? (Math.random() < 0.5 ? 0 : 1) : lang;
   }
 
   // put a pair on the field, prompt up, translation held back
@@ -719,37 +730,42 @@ const CARDS = [
   const DAY = 864e5;
   const AGAIN = 3, AGAIN_AGAIN = 9;  // how far back a card drops when it comes back
   const STUCK = 3;                   // misses in one round before it is set aside
-  let MEM = fold(read("src.mem") || {});
+  let MEM = migrate(read("src.mem") || {});
   let queue = [], cur = null;
   let done = 0, hits = 0, miss = 0;
   let busy = false;
 
-  // one record per card, whichever way round it was drilled: a vocabulary item
-  // is one thing to know, so DE, EN and mixed all read and write the same state
-  function id(card) { return card[0] + "␟" + card[1]; }
+  // identifies a card on its own, direction aside, so it survives CARDS being
+  // reordered or grown between sessions
+  function cardId(card) { return card[0] + "␟" + card[1]; }
 
-  // memory was once kept per direction; fold those halves together and keep
-  // the weaker of the two, so nothing already learned is claimed twice
-  function fold(mem) {
+  // one record per card *and* direction: recalling a word is not the same
+  // skill as producing it, so each side of the pair earns its own interval
+  function memId(card, d) { return cardId(card) + "␟" + d; }
+
+  // records were briefly folded across directions into one, on the theory that
+  // a word is a word either way round. Split each of those back into both
+  // directions, seeding both from the merged state so neither starts from
+  // scratch; anything already direction-keyed (from before the fold, or a
+  // prior run of this same migration) passes through untouched
+  function migrate(mem) {
     const out = {};
     Object.keys(mem).forEach(function (k) {
-      const m = mem[k], base = k.replace(/␟[01]$/, ""), had = out[base];
-      out[base] = had ? {
-        n: Math.min(had.n, m.n),
-        e: Math.min(had.e, m.e),
-        i: Math.min(had.i, m.i),
-        d: Math.min(had.d, m.d),
-        l: had.l + m.l
-      } : m;
+      if (/␟[01]$/.test(k)) { out[k] = mem[k]; return; }
+      const m = mem[k];
+      [0, 1].forEach(function (d) {
+        const dk = k + "␟" + d;
+        if (!out[dk]) out[dk] = { n: m.n, e: m.e, i: m.i, d: m.d, l: m.l };
+      });
     });
     return out;
   }
-  function grades(card) {
-    const k = id(card);
+  function grades(card, d) {
+    const k = memId(card, d);
     return MEM[k] || (MEM[k] = { n: 0, e: 2.5, i: 0, d: 0, l: 0 });
   }
-  function when(card) {
-    const m = MEM[id(card)];
+  function when(card, d) {
+    const m = MEM[memId(card, d)];
     return m ? m.d : 0;
   }
 
@@ -758,21 +774,26 @@ const CARDS = [
     save("src.run", JSON.stringify({
       t: String(lang), l: level, r: round, d: done, h: hits, m: miss,
       q: queue.map(function (x) {
-        return [id(CARDS[x.i]), x.again, x.step, x.tried, x.misses, x.d];
+        return [cardId(CARDS[x.i]), x.again, x.step, x.tried, x.misses, x.d];
       })
     }));
   }
 
   // the round always holds the whole pool — what the spacing decides is the
-  // order: unseen and overdue cards lead, long intervals trail behind
+  // order: unseen and overdue cards lead, long intervals trail behind. mixed
+  // enters every card twice, once per direction, so both get drilled
   function newRound(n) {
     round = n;
     done = hits = miss = 0;
-    const order = shuffle(POOL.slice());
-    order.sort(function (a, b) { return when(CARDS[a]) - when(CARDS[b]); });
+    const order = [];
+    POOL.forEach(function (i) {
+      sides().forEach(function (d) { order.push({ i: i, d: d }); });
+    });
+    shuffle(order);
+    order.sort(function (a, b) { return when(CARDS[a.i], a.d) - when(CARDS[b.i], b.d); });
     // a card keeps the side it was dealt, so a miss comes back the same way
-    queue = order.map(function (i) {
-      return { i: i, again: 0, step: 0, tried: 0, misses: 0, d: side() };
+    queue = order.map(function (e) {
+      return { i: e.i, again: 0, step: 0, tried: 0, misses: 0, d: e.d };
     });
     keep();
   }
@@ -783,7 +804,7 @@ const CARDS = [
     const s = read("src.run");
     if (!s || s.t !== String(lang) || s.l !== level || !s.q || !s.q.length) return false;
     const at = {};
-    CARDS.forEach(function (c, i) { at[id(c)] = i; });
+    CARDS.forEach(function (c, i) { at[cardId(c)] = i; });
     queue = [];
     s.q.forEach(function (e) {
       const i = at[e[0]];
@@ -827,7 +848,7 @@ const CARDS = [
   // has to be met twice before it leaves
   function grade(ok) {
     if (!cards || !revealed || busy || !cur) return;
-    const m = grades(CARDS[cur.i]);
+    const m = grades(CARDS[cur.i], cur.d);
     if (ok) {
       m.n++;
       m.i = m.n === 1 ? 1 : m.n === 2 ? 3 : Math.max(1, Math.round(m.i * m.e));
@@ -947,22 +968,22 @@ const CARDS = [
     if (!cards) return roundLength();
     if (!round) return;             // nothing drawn yet
     const back = queue.reduce(function (n, x) { return n + (x.again ? 1 : 0); }, 0);
-    total.textContent = "Runde " + round + " · " + done + " von " + POOL.length +
+    total.textContent = "Runde " + round + " · " + done + " von " + roundSize() +
                         (back ? " · " + back + " Wiederholungen" : "");
   }
 
   // a full round is the sum of every card's two phases at the current settings;
-  // mixed lands somewhere between the two directions, so take the middle
+  // mixed drills both directions, so it's the sum of the two, not their average
   function roundLength() {
     let ms = 0;
     for (let j = 0; j < POOL.length; j++) {
       const i = POOL[j];
       const there = span(PROMPT_MS, CARDS[i][0]) + span(ANSWER_MS, CARDS[i][1]);
       const back  = span(PROMPT_MS, CARDS[i][1]) + span(ANSWER_MS, CARDS[i][0]);
-      ms += lang === MIX ? (there + back) / 2 : (lang ? back : there);
+      ms += lang === MIX ? there + back : (lang ? back : there);
     }
     const secs = Math.round(ms / 1000);
-    total.textContent = POOL.length + " Vokabeln · " + Math.floor(secs / 60) +
+    total.textContent = roundSize() + " Vokabeln · " + Math.floor(secs / 60) +
                         ":" + ("0" + (secs % 60)).slice(-2) + " min pro Runde";
   }
 
