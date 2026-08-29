@@ -39,13 +39,13 @@
     --mute: #3A6180;
   }
 
-  /* corner controls: theme dot right, the direction switch left */
-  #theme, #lang {
+  /* corner controls: theme dot right, the direction switch left, the word-set switch centred */
+  #theme, #lang, #level {
     position: fixed;
     z-index: 3;
     top: calc(3vh + env(safe-area-inset-top));
   }
-  #lang {
+  #lang, #level {
     padding: 0;
     border: none;
     background: none;
@@ -66,8 +66,9 @@
     -webkit-tap-highlight-color: transparent;
   }
   #theme:hover, #theme:focus-visible,
-  #lang:hover,  #lang:focus-visible { opacity: 1; color: var(--dim); }
-  #theme:focus-visible, #lang:focus-visible { outline: none; }
+  #lang:hover,  #lang:focus-visible,
+  #level:hover, #level:focus-visible { opacity: 1; color: var(--dim); }
+  #theme:focus-visible, #lang:focus-visible, #level:focus-visible { outline: none; }
 
   /* theme toggle: outline = light, half = auto, filled = dark */
   #theme {
@@ -94,6 +95,21 @@
     white-space: nowrap;
   }
   #lang .arrow { opacity: .6; }
+
+  /* centred switch: all words, or only the ones not marked simple */
+  #level {
+    left: 50%;
+    transform: translateX(-50%);
+    height: 22px;
+    display: flex;
+    align-items: center;
+    font: inherit;
+    font-size: clamp(9px, 1.5vmin, 12px);
+    font-weight: 700;
+    letter-spacing: .12em;
+    line-height: 1;
+    white-space: nowrap;
+  }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: var(--deep); }
@@ -356,6 +372,10 @@
     </svg>
   </button>
 
+  <button id="level" type="button" aria-label="Auswahl: alle Wörter" title="Auswahl: alle Wörter">
+    <span id="levelLabel">Alle</span>
+  </button>
+
   <div id="wrap"><span id="head"></span><span id="tail"></span></div>
 
   <div id="lap" aria-hidden="true"><span id="lapnum"></span><i class="rule"></i><span id="lapsub"></span></div>
@@ -376,117 +396,118 @@
   </div>
 
 <script>
-// [German, English]
+// [German, English, "simple"?] — the third slot flags a word plain English
+// already covers, so "Complex" mode can leave it out of the rotation
 const CARDS = [
-  ["abnehmend", "decreasing"],
+  ["abnehmend", "decreasing", "simple"],
   ["Dünung", "swell"],
   ["mäßige Sicht", "moderate visibility"],
-  ["schlechte Sicht", "poor visibility"],
-  ["rasch zunehmend", "rapidly increasing"],
+  ["schlechte Sicht", "poor visibility", "simple"],
+  ["rasch zunehmend", "rapidly increasing", "simple"],
   ["raue See", "rough sea"],
-  ["Regen", "rain"],
+  ["Regen", "rain", "simple"],
   ["Schauer", "showers"],
   ["rechtdrehend", "veering"],
   ["Sprühregen", "drizzle"],
   ["Stärke", "force"],
   ["westliche Winde", "westerly winds"],
   ["Sturmwarnung", "gale warning"],
-  ["zunehmend", "increasing"],
-  ["Vorhersagegebiet", "forecast area"],
-  ["Wettervorhersage", "weather forecast"],
-  ["hat Anker verloren", "has lost anchor"],
-  ["zeitweise", "at times"],
-  ["bewusstlos", "unconscious"],
-  ["bisher nicht eingetroffen", "not yet arrived"],
-  ["Brandabwehr", "fire fighting"],
+  ["zunehmend", "increasing", "simple"],
+  ["Vorhersagegebiet", "forecast area", "simple"],
+  ["Wettervorhersage", "weather forecast", "simple"],
+  ["hat Anker verloren", "has lost anchor", "simple"],
+  ["zeitweise", "at times", "simple"],
+  ["bewusstlos", "unconscious", "simple"],
+  ["bisher nicht eingetroffen", "not yet arrived", "simple"],
+  ["Brandabwehr", "fire fighting", "simple"],
   ["Sände (die Sandbänke)", "banks"],
-  ["dringend", "urgent"],
-  ["Feuer", "fire"],
+  ["dringend", "urgent", "simple"],
+  ["Feuer", "fire", "simple"],
   ["gebrochener Mast", "broken mast"],
-  ["Herzinfarkt", "heart attack"],
-  ["Hubschrauber", "helicopter"],
+  ["Herzinfarkt", "heart attack", "simple"],
+  ["Hubschrauber", "helicopter", "simple"],
   ["gekentert", "capsized"],
-  ["Kollision", "collision"],
-  ["in kritischem Zustand", "in critical condition"],
+  ["Kollision", "collision", "simple"],
+  ["in kritischem Zustand", "in critical condition", "simple"],
   ["manövrierunfähig (sein)", "not (to be) under command"],
   ["Mensch über Bord", "person over board"],
   ["mögliche Hilfeleistung", "possible assistance"],
   ["nicht unter Kontrolle (sein)", "not (to be) under control"],
   ["Rettungsfloß", "liferaft"],
   ["Rettungsboot", "lifeboat"],
-  ["Ruder gebrochen/defekt", "rudder broken"],
-  ["Schiff brennt", "vessel on fire"],
+  ["Ruder gebrochen/defekt", "rudder broken", "simple"],
+  ["Schiff brennt", "vessel on fire", "simple"],
   ["Schlepperhilfe", "tug assistance"],
-  ["schwer verletzt", "seriously injured"],
+  ["schwer verletzt", "seriously injured", "simple"],
   ["Seenotleitung", "MRCC"],
-  ["Yacht sinkt", "yacht is sinking"],
-  ["sofortige Hilfe", "immediate help"],
+  ["Yacht sinkt", "yacht is sinking", "simple"],
+  ["sofortige Hilfe", "immediate help", "simple"],
   ["Wassereinbruch", "flooding"],
   ["scharf Ausschau halten", "keep sharp lookout"],
   ["starke Schlagseite", "heavy list"],
-  ["überfällig", "Overdue"],
-  ["Überlebende", "survivors"],
+  ["überfällig", "Overdue", "simple"],
+  ["Überlebende", "survivors", "simple"],
   ["vom Mast gefallen", "fallen off the mast"],
-  ["Rote Raketen", "red rockets"],
-  ["Motorschaden", "engine trouble"],
+  ["Rote Raketen", "red rockets", "simple"],
+  ["Motorschaden", "engine trouble", "simple"],
   ["Abstand halten", "keep a berth"],
-  ["ankern", "to anchor"],
-  ["ansteuern", "to approach"],
-  ["auf der/dieser Route", "on this route"],
-  ["auf (etw.) zu", "towards (something)"],
+  ["ankern", "to anchor", "simple"],
+  ["ansteuern", "to approach", "simple"],
+  ["auf der/dieser Route", "on this route", "simple"],
+  ["auf (etw.) zu", "towards (something)", "simple"],
   ["mit Bestimmungshafen", "bound for"],
   ["Fahrwasser", "fairway"],
-  ["Gebiet", "area"],
-  ["Geschwindigkeit", "speed"],
-  ["in der Nähe von", "in vicinity of"],
-  ["Kurs", "course"],
+  ["Gebiet", "area", "simple"],
+  ["Geschwindigkeit", "speed", "simple"],
+  ["in der Nähe von", "in vicinity of", "simple"],
+  ["Kurs", "course", "simple"],
   ["Leucht-Heultonne", "light and whistle buoy"],
-  ["Länge", "length"],
-  ["Ortszeit", "local time"],
-  ["Position", "position"],
+  ["Länge", "length", "simple"],
+  ["Ortszeit", "local time", "simple"],
+  ["Position", "position", "simple"],
   ["rechtweisende Peilung", "true bearing"],
   ["rechtweisender Kurs", "true course"],
   ["Tiefwasserweg", "deep water lane"],
   ["unterwegs", "underway"],
   ["Verkehrstrennungsgebiet", "traffic separation scheme"],
   ["verlöscht gemeldet", "reported unlit"],
-  ["vorsichtig navigieren", "navigate carefully"],
+  ["vorsichtig navigieren", "navigate carefully", "simple"],
   ["Aufbauten", "superstructures"],
-  ["mit der Aufschrift", "marked with"],
-  ["Fischereifahrzeug", "fishing vessel"],
-  ["Motorraum", "engine room"],
-  ["rot gestrichene", "red painted"],
+  ["mit der Aufschrift", "marked with", "simple"],
+  ["Fischereifahrzeug", "fishing vessel", "simple"],
+  ["Motorraum", "engine room", "simple"],
+  ["rot gestrichene", "red painted", "simple"],
   ["roter Rumpf", "red hull"],
   ["Steuerbord", "starboard"],
-  ["weiße Segel", "white sails"],
+  ["weiße Segel", "white sails", "simple"],
   ["Backbord", "port side"],
   ["Besatzungsmitglied", "crew member"],
-  ["berichten an", "report to"],
-  ["fortgeführt", "in progress"],
-  ["nicht gesichtet", "not sighted"],
-  ["weder noch", "neither ... nor ..."],
-  ["werden gebeten", "are requested"],
-  ["zuletzt gesichtet", "last seen"],
-  ["zwei Personen", "two persons"],
-  ["zwischen", "between"],
-  ["an Bord", "on board"],
-  ["empfangen", "received"],
-  ["Austausch", "replacement"],
+  ["berichten an", "report to", "simple"],
+  ["fortgeführt", "in progress", "simple"],
+  ["nicht gesichtet", "not sighted", "simple"],
+  ["weder noch", "neither ... nor ...", "simple"],
+  ["werden gebeten", "are requested", "simple"],
+  ["zuletzt gesichtet", "last seen", "simple"],
+  ["zwei Personen", "two persons", "simple"],
+  ["zwischen", "between", "simple"],
+  ["an Bord", "on board", "simple"],
+  ["empfangen", "received", "simple"],
+  ["Austausch", "replacement", "simple"],
   ["Betonnung", "buoyage"],
   ["Fischereigeschirr nutzen", "to use fishing gear"],
   ["Nachrichten für Seefahrer", "notices to mariners"],
   ["Nautische Warnung", "navigational warning"],
   ["Unterwasser-Kabel-Arbeiten", "underwater cable operations"],
-  ["Küstenwache", "coast guard"],
-  ["ich korrigiere", "I correct"],
-  ["ich wiederhole", "I repeat"],
-  ["ich buchstabiere", "I spell"],
-  ["ich wiederhole und buchstabiere", "I repeat and spell"],
-  ["Doppelpunkt", "colon"],
-  ["Komma", "decimal"],
-  ["Punkt (Satzzeichen)", "stop"],
-  ["neues Wort", "new word/next word"],
-  ["in Zahlen", "in figures"]
+  ["Küstenwache", "coast guard", "simple"],
+  ["ich korrigiere", "I correct", "simple"],
+  ["ich wiederhole", "I repeat", "simple"],
+  ["ich buchstabiere", "I spell", "simple"],
+  ["ich wiederhole und buchstabiere", "I repeat and spell", "simple"],
+  ["Doppelpunkt", "colon", "simple"],
+  ["Komma", "decimal", "simple"],
+  ["Punkt (Satzzeichen)", "stop", "simple"],
+  ["neues Wort", "new word/next word", "simple"],
+  ["in Zahlen", "in figures", "simple"]
 ];
   // pace scales a budget that grows with the phrase: reading time tracks
   // letters rather than words, so a German compound gets the time it needs.
@@ -503,6 +524,8 @@ const CARDS = [
   const marks = document.querySelectorAll("#marks span");
   const langBtn = document.getElementById("lang");
   const arrow = document.querySelector("#lang .arrow");
+  const levelBtn = document.getElementById("level");
+  const levelLabel = document.getElementById("levelLabel");
   const dock  = document.getElementById("dock");
   const total = document.getElementById("total");
   const lap    = document.getElementById("lap");
@@ -519,6 +542,8 @@ const CARDS = [
   let cards = false;
   let lang = 0;                // 0 = DE -> EN, 1 = EN -> DE, 2 = both mixed
   const MIX = 2;
+  let level = 0;                // 0 = all words, 1 = complex (not marked simple) only
+  let POOL = [];                // indices into CARDS eligible at the current level
   let revealed = false;
   let deck = [], last = null;
   let timer = null;
@@ -536,11 +561,18 @@ const CARDS = [
     try { return JSON.parse(load(key)); } catch (e) { return null; }
   }
 
+  // the pool of indices eligible at the current level; Complex mode drops
+  // anything marked "simple" so only the real shipping vocabulary comes up
+  function updatePool() {
+    POOL = CARDS.map(function (c, i) { return i; })
+      .filter(function (i) { return level === 0 || CARDS[i][2] !== "simple"; });
+  }
+
   /* ---- ticker: every phrase once per round, on a timer -------------------- */
 
   // every phrase comes up once per round; a reshuffle never repeats the last one
   function refill() {
-    deck = CARDS.map(function (c, i) { return i; });
+    deck = POOL.slice();
     shuffle(deck);
     if (deck[deck.length - 1] === last && deck.length > 1) {
       [deck[deck.length - 1], deck[0]] = [deck[0], deck[deck.length - 1]];
@@ -724,7 +756,7 @@ const CARDS = [
   function keep() {
     save("src.mem", JSON.stringify(MEM));
     save("src.run", JSON.stringify({
-      t: String(lang), r: round, d: done, h: hits, m: miss,
+      t: String(lang), l: level, r: round, d: done, h: hits, m: miss,
       q: queue.map(function (x) {
         return [id(CARDS[x.i]), x.again, x.step, x.tried, x.misses, x.d];
       })
@@ -736,7 +768,7 @@ const CARDS = [
   function newRound(n) {
     round = n;
     done = hits = miss = 0;
-    const order = shuffle(CARDS.map(function (c, i) { return i; }));
+    const order = shuffle(POOL.slice());
     order.sort(function (a, b) { return when(CARDS[a]) - when(CARDS[b]); });
     // a card keeps the side it was dealt, so a miss comes back the same way
     queue = order.map(function (i) {
@@ -746,10 +778,10 @@ const CARDS = [
   }
 
   // pick the round back up where it was left, as long as nothing about the
-  // deck has moved under it
+  // deck or the level has moved under it
   function resume() {
     const s = read("src.run");
-    if (!s || s.t !== String(lang) || !s.q || !s.q.length) return false;
+    if (!s || s.t !== String(lang) || s.l !== level || !s.q || !s.q.length) return false;
     const at = {};
     CARDS.forEach(function (c, i) { at[id(c)] = i; });
     queue = [];
@@ -875,7 +907,7 @@ const CARDS = [
   // the field itself is the reveal: anywhere but the controls turns the card
   document.addEventListener("click", function (e) {
     if (!cards || revealed) return;
-    if (e.target.closest && e.target.closest("#dock, #lang, #theme")) return;
+    if (e.target.closest && e.target.closest("#dock, #lang, #theme, #level")) return;
     flip();
   });
 
@@ -915,7 +947,7 @@ const CARDS = [
     if (!cards) return roundLength();
     if (!round) return;             // nothing drawn yet
     const back = queue.reduce(function (n, x) { return n + (x.again ? 1 : 0); }, 0);
-    total.textContent = "Runde " + round + " · " + done + " von " + CARDS.length +
+    total.textContent = "Runde " + round + " · " + done + " von " + POOL.length +
                         (back ? " · " + back + " Wiederholungen" : "");
   }
 
@@ -923,13 +955,14 @@ const CARDS = [
   // mixed lands somewhere between the two directions, so take the middle
   function roundLength() {
     let ms = 0;
-    for (let i = 0; i < CARDS.length; i++) {
+    for (let j = 0; j < POOL.length; j++) {
+      const i = POOL[j];
       const there = span(PROMPT_MS, CARDS[i][0]) + span(ANSWER_MS, CARDS[i][1]);
       const back  = span(PROMPT_MS, CARDS[i][1]) + span(ANSWER_MS, CARDS[i][0]);
       ms += lang === MIX ? (there + back) / 2 : (lang ? back : there);
     }
     const secs = Math.round(ms / 1000);
-    total.textContent = CARDS.length + " Vokabeln · " + Math.floor(secs / 60) +
+    total.textContent = POOL.length + " Vokabeln · " + Math.floor(secs / 60) +
                         ":" + ("0" + (secs % 60)).slice(-2) + " min pro Runde";
   }
 
@@ -964,6 +997,22 @@ const CARDS = [
     restart();
   });
 
+  const LEVELS = ["Alle", "Komplex"];
+  const LEVEL_DESC = ["alle Wörter", "nur komplexe Wörter"];
+  function setLevel() {
+    levelLabel.textContent = LEVELS[level];
+    levelBtn.setAttribute("aria-label", "Auswahl: " + LEVEL_DESC[level]);
+    levelBtn.setAttribute("title", "Auswahl: " + LEVEL_DESC[level]);
+    updatePool();
+    status();
+    save("src.level", level);
+  }
+  levelBtn.addEventListener("click", function () {
+    level = (level + 1) % LEVELS.length;
+    setLevel();
+    restart();
+  });
+
   // theme: auto -> light -> dark -> auto
   const THEMES = ["auto", "light", "dark"];
   const root  = document.documentElement;
@@ -986,8 +1035,11 @@ const CARDS = [
   if (savedPace >= 0 && savedPace < PACE.length) speed.value = savedPace;
   const savedLang = parseInt(load("src.lang") || load("src.dir"), 10);
   if (savedLang >= 0 && savedLang < LABEL.length) lang = savedLang;
+  const savedLevel = parseInt(load("src.level"), 10);
+  if (savedLevel >= 0 && savedLevel < LEVELS.length) level = savedLevel;
   setPace();
   setLang();
+  setLevel();
   ready = true;
 
   speed.addEventListener("input", setPace);
